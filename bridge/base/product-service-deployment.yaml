@@ -1,0 +1,50 @@
+#! product-service-deployment.yaml
+# Generated code, do not edit
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+    name: product-service
+    namespace: ecommerce-microservices
+    labels:
+        com.docker.compose.project: ecommerce-microservices
+        com.docker.compose.service: product-service
+spec:
+    replicas: 1
+    selector:
+        matchLabels:
+            com.docker.compose.project: ecommerce-microservices
+            com.docker.compose.service: product-service
+    strategy:
+        type: Recreate
+    template:
+        metadata:
+            labels:
+                com.docker.compose.project: ecommerce-microservices
+                com.docker.compose.service: product-service
+                com.docker.compose.network.ecommerce-network: "true"
+        spec:
+            restartPolicy: unless-stopped
+            containers:
+                - name: product-service
+                  image: ecommerce-microservices-product-service
+                  imagePullPolicy: IfNotPresent
+                  env:
+                    - name: DB_HOST
+                      value: "product-db"
+                    - name: DB_NAME
+                      value: "product_db"
+                    - name: DB_PASSWORD
+                      value: "postgres"
+                    - name: DB_PORT
+                      value: "5432"
+                    - name: DB_USERNAME
+                      value: "postgres"
+                    - name: FRONTEND_URL
+                      value: "http://localhost:3000"
+                    - name: PORT
+                      value: "3002"
+                    - name: USER_SERVICE_URL
+                      value: "http://user-service:3001"
+                  ports:
+                    - name: product-se-3002
+                      containerPort: 3002

@@ -1,0 +1,21 @@
+#! order-db-service.yaml
+# Generated code, do not edit
+apiVersion: v1
+kind: Service
+metadata:
+    name: order-db-published
+    namespace: ecommerce-microservices
+    labels:
+        com.docker.compose.project: ecommerce-microservices
+        com.docker.compose.service: order-db
+spec:
+    selector:
+        com.docker.compose.project: ecommerce-microservices
+        com.docker.compose.service: order-db
+    ports:
+        - name: order-db-5436
+          port: 5436
+          protocol: TCP
+          targetPort: order-db-5432
+
+# check if there is at least one published port

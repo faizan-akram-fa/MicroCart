@@ -1,0 +1,21 @@
+#! product-db-service.yaml
+# Generated code, do not edit
+apiVersion: v1
+kind: Service
+metadata:
+    name: product-db-published
+    namespace: ecommerce-microservices
+    labels:
+        com.docker.compose.project: ecommerce-microservices
+        com.docker.compose.service: product-db
+spec:
+    selector:
+        com.docker.compose.project: ecommerce-microservices
+        com.docker.compose.service: product-db
+    ports:
+        - name: product-db-5434
+          port: 5434
+          protocol: TCP
+          targetPort: product-db-5432
+
+# check if there is at least one published port

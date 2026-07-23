@@ -1,0 +1,46 @@
+#! wishlist-db-deployment.yaml
+# Generated code, do not edit
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+    name: wishlist-db
+    namespace: ecommerce-microservices
+    labels:
+        com.docker.compose.project: ecommerce-microservices
+        com.docker.compose.service: wishlist-db
+spec:
+    replicas: 1
+    selector:
+        matchLabels:
+            com.docker.compose.project: ecommerce-microservices
+            com.docker.compose.service: wishlist-db
+    strategy:
+        type: Recreate
+    template:
+        metadata:
+            labels:
+                com.docker.compose.project: ecommerce-microservices
+                com.docker.compose.service: wishlist-db
+                com.docker.compose.network.ecommerce-network: "true"
+        spec:
+            containers:
+                - name: wishlist-db
+                  image: postgres:15-alpine
+                  imagePullPolicy: IfNotPresent
+                  env:
+                    - name: POSTGRES_DB
+                      value: "wishlist_db"
+                    - name: POSTGRES_PASSWORD
+                      value: "postgres"
+                    - name: POSTGRES_USER
+                      value: "postgres"
+                  ports:
+                    - name: wishlist-d-5432
+                      containerPort: 5432
+                  volumeMounts:
+                    - name: var-lib-postgresql-data
+                      mountPath: /var/lib/postgresql/data
+            volumes:
+                - name: var-lib-postgresql-data
+                  persistentVolumeClaim:
+                    claimName: wishlist-db-wishlist-db-data

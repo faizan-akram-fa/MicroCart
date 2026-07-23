@@ -1,0 +1,45 @@
+#! kustomization.yaml
+# Generated code, do not edit
+apiVersion: kustomize.config.k8s.io/v1beta1
+kind: Kustomization
+resources:
+    - 0-ecommerce-microservices-namespace.yaml
+    - api-gateway-deployment.yaml
+    - api-gateway-expose.yaml
+    - api-gateway-service.yaml
+    - cart-db-cart-db-data-persistentVolumeClaim.yaml
+    - cart-db-deployment.yaml
+    - cart-db-expose.yaml
+    - cart-db-service.yaml
+    - cart-service-deployment.yaml
+    - cart-service-expose.yaml
+    - cart-service-service.yaml
+    - ecommerce-network-network-policy.yaml
+    - order-db-deployment.yaml
+    - order-db-expose.yaml
+    - order-db-order-db-data-persistentVolumeClaim.yaml
+    - order-db-service.yaml
+    - order-service-deployment.yaml
+    - order-service-expose.yaml
+    - order-service-service.yaml
+    - product-db-deployment.yaml
+    - product-db-expose.yaml
+    - product-db-product-db-data-persistentVolumeClaim.yaml
+    - product-db-service.yaml
+    - product-service-deployment.yaml
+    - product-service-expose.yaml
+    - product-service-service.yaml
+    - user-db-deployment.yaml
+    - user-db-expose.yaml
+    - user-db-service.yaml
+    - user-db-user-db-data-persistentVolumeClaim.yaml
+    - user-service-deployment.yaml
+    - user-service-expose.yaml
+    - user-service-service.yaml
+    - wishlist-db-deployment.yaml
+    - wishlist-db-expose.yaml
+    - wishlist-db-service.yaml
+    - wishlist-db-wishlist-db-data-persistentVolumeClaim.yaml
+    - wishlist-service-deployment.yaml
+    - wishlist-service-expose.yaml
+    - wishlist-service-service.yaml

@@ -1,0 +1,48 @@
+#! api-gateway-deployment.yaml
+# Generated code, do not edit
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+    name: api-gateway
+    namespace: ecommerce-microservices
+    labels:
+        com.docker.compose.project: ecommerce-microservices
+        com.docker.compose.service: api-gateway
+spec:
+    replicas: 1
+    selector:
+        matchLabels:
+            com.docker.compose.project: ecommerce-microservices
+            com.docker.compose.service: api-gateway
+    strategy:
+        type: Recreate
+    template:
+        metadata:
+            labels:
+                com.docker.compose.project: ecommerce-microservices
+                com.docker.compose.service: api-gateway
+                com.docker.compose.network.ecommerce-network: "true"
+        spec:
+            restartPolicy: unless-stopped
+            containers:
+                - name: api-gateway
+                  image: ecommerce-microservices-api-gateway
+                  imagePullPolicy: IfNotPresent
+                  env:
+                    - name: CART_SERVICE_URL
+                      value: "http://cart-service:3003"
+                    - name: FRONTEND_URL
+                      value: "http://localhost:3000"
+                    - name: ORDER_SERVICE_URL
+                      value: "http://order-service:3004"
+                    - name: PORT
+                      value: "3000"
+                    - name: PRODUCT_SERVICE_URL
+                      value: "http://product-service:3002"
+                    - name: USER_SERVICE_URL
+                      value: "http://user-service:3001"
+                    - name: WISHLIST_SERVICE_URL
+                      value: "http://wishlist-service:3005"
+                  ports:
+                    - name: api-gatewa-3000
+                      containerPort: 3000

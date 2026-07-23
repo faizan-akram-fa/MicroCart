@@ -1,0 +1,18 @@
+#! cart-service-expose.yaml
+# Generated code, do not edit
+apiVersion: v1
+kind: Service
+metadata:
+    name: cart-service
+    namespace: ecommerce-microservices
+    labels:
+        com.docker.compose.project: ecommerce-microservices
+        com.docker.compose.service: cart-service
+spec:
+    selector:
+        com.docker.compose.project: ecommerce-microservices
+        com.docker.compose.service: cart-service
+    ports:
+        - name: cart-servi-3003
+          port: 3003
+          targetPort: cart-servi-3003

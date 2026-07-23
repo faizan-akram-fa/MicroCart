@@ -1,0 +1,23 @@
+#! kustomization.yaml
+# Generated code, do not edit
+apiVersion: kustomize.config.k8s.io/v1beta1
+kind: Kustomization
+resources:
+    - ../../base
+patches:
+    - path: api-gateway-service.yaml
+    - path: cart-db-cart-db-data-persistentVolumeClaim.yaml
+    - path: cart-db-service.yaml
+    - path: cart-service-service.yaml
+    - path: order-db-order-db-data-persistentVolumeClaim.yaml
+    - path: order-db-service.yaml
+    - path: order-service-service.yaml
+    - path: product-db-product-db-data-persistentVolumeClaim.yaml
+    - path: product-db-service.yaml
+    - path: product-service-service.yaml
+    - path: user-db-service.yaml
+    - path: user-db-user-db-data-persistentVolumeClaim.yaml
+    - path: user-service-service.yaml
+    - path: wishlist-db-service.yaml
+    - path: wishlist-db-wishlist-db-data-persistentVolumeClaim.yaml
+    - path: wishlist-service-service.yaml

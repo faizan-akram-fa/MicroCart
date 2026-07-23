@@ -1,0 +1,18 @@
+#! cart-db-expose.yaml
+# Generated code, do not edit
+apiVersion: v1
+kind: Service
+metadata:
+    name: cart-db
+    namespace: ecommerce-microservices
+    labels:
+        com.docker.compose.project: ecommerce-microservices
+        com.docker.compose.service: cart-db
+spec:
+    selector:
+        com.docker.compose.project: ecommerce-microservices
+        com.docker.compose.service: cart-db
+    ports:
+        - name: cart-db-5432
+          port: 5432
+          targetPort: cart-db-5432

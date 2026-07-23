@@ -1,0 +1,168 @@
+name: MicroCart Microservices CI/CD Pipeline
+
+on:
+  push:
+    branches: [ main, master, develop ]
+  pull_request:
+    branches: [ main, master ]
+
+env:
+  REGISTRY: ghcr.io
+  IMAGE_PREFIX: ${{ github.repository_owner }}/microcart
+
+jobs:
+  # =========================================================================
+  # STAGE 1: Continuous Integration (Lint, Typecheck, and Build Verification)
+  # =========================================================================
+  ci-services:
+    name: Build & Verify Service (${{ matrix.service }})
+    runs-on: ubuntu-latest
+
+    strategy:
+      fail-fast: false
+      matrix:
+        service:
+          - api-gateway
+          - user-service
+          - product-service
+          - order-service
+          - cart-service
+          - wishlist-service
+          - support-service
+
+    steps:
+      - name: Checkout Code
+        uses: actions/checkout@v4
+
+      - name: Setup Node.js 20
+        uses: actions/setup-node@v4
+        with:
+          node-version: '20'
+          cache: 'npm'
+          cache-dependency-path: 'services/${{ matrix.service }}/package-lock.json'
+
+      - name: Install Service Dependencies
+        working-directory: ./services/${{ matrix.service }}
+        run: npm ci || npm install
+
+      - name: Typecheck TypeScript Code
+        working-directory: ./services/${{ matrix.service }}
+        run: npx tsc --noEmit
+
+      - name: Build Microservice
+        working-directory: ./services/${{ matrix.service }}
+        run: npm run build
+
+  ci-frontend:
+    name: Build & Verify Frontend App
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout Code
+        uses: actions/checkout@v4
+
+      - name: Setup Node.js 20
+        uses: actions/setup-node@v4
+        with:
+          node-version: '20'
+          cache: 'npm'
+          cache-dependency-path: 'frontend/package-lock.json'
+
+      - name: Install Frontend Dependencies
+        working-directory: ./frontend
+        run: npm ci || npm install
+
+      - name: Typecheck Next.js Frontend
+        working-directory: ./frontend
+        run: npx tsc --noEmit
+
+  # =========================================================================
+  # STAGE 2: Continuous Deployment (Docker Image Build & Push to GHCR)
+  # =========================================================================
+  docker-build-push:
+    name: Build & Push Docker Image (${{ matrix.target }})
+    needs: [ci-services, ci-frontend]
+    if: github.ref == 'refs/heads/main' || github.ref == 'refs/heads/master'
+    runs-on: ubuntu-latest
+
+    strategy:
+      fail-fast: false
+      matrix:
+        include:
+          - target: api-gateway
+            context: ./services/api-gateway
+            dockerfile: ./services/api-gateway/Dockerfile
+          - target: user-service
+            context: ./services/user-service
+            dockerfile: ./services/user-service/Dockerfile
+          - target: product-service
+            context: ./services/product-service
+            dockerfile: ./services/product-service/Dockerfile
+          - target: order-service
+            context: ./services/order-service
+            dockerfile: ./services/order-service/Dockerfile
+          - target: cart-service
+            context: ./services/cart-service
+            dockerfile: ./services/cart-service/Dockerfile
+          - target: wishlist-service
+            context: ./services/wishlist-service
+            dockerfile: ./services/wishlist-service/Dockerfile
+          - target: support-service
+            context: ./services/support-service
+            dockerfile: ./services/support-service/Dockerfile
+          - target: frontend
+            context: ./frontend
+            dockerfile: ./frontend/Dockerfile
+
+    steps:
+      - name: Checkout Code
+        uses: actions/checkout@v4
+
+      - name: Set up Docker Buildx
+        uses: docker/setup-buildx-action@v3
+
+      - name: Log in to GitHub Container Registry
+        uses: docker/login-action@v3
+        with:
+          registry: ${{ env.REGISTRY }}
+          username: ${{ github.actor }}
+          password: ${{ secrets.GITHUB_TOKEN }}
+
+      - name: Extract Metadata (Tags, Labels) for Docker
+        id: meta
+        uses: docker/metadata-action@v5
+        with:
+          images: ${{ env.REGISTRY }}/${{ env.IMAGE_PREFIX }}-${{ matrix.target }}
+          tags: |
+            type=raw,value=latest
+            type=sha,format=short
+
+      - name: Build and Push Docker Image
+        uses: docker/build-push-action@v5
+        with:
+          context: ${{ matrix.context }}
+          file: ${{ matrix.dockerfile }}
+          push: true
+          tags: ${{ steps.meta.outputs.tags }}
+          labels: ${{ steps.meta.outputs.labels }}
+          cache-from: type=gha
+          cache-to: type=gha,mode=max
+
+  # =========================================================================
+  # STAGE 3: Post-Deployment Summary
+  # =========================================================================
+  deployment-summary:
+    name: CI/CD Pipeline Status Summary
+    needs: [docker-build-push]
+    if: always() && (github.ref == 'refs/heads/main' || github.ref == 'refs/heads/master')
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Pipeline Report
+        run: |
+          echo "================================================="
+          echo "🚀 MicroCart CI/CD Pipeline Execution Completed!"
+          echo "Branch: ${{ github.ref }}"
+          echo "Commit: ${{ github.sha }}"
+          echo "Container Registry: ${{ env.REGISTRY }}"
+          echo "================================================="

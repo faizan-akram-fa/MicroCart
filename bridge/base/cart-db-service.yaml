@@ -1,0 +1,21 @@
+#! cart-db-service.yaml
+# Generated code, do not edit
+apiVersion: v1
+kind: Service
+metadata:
+    name: cart-db-published
+    namespace: ecommerce-microservices
+    labels:
+        com.docker.compose.project: ecommerce-microservices
+        com.docker.compose.service: cart-db
+spec:
+    selector:
+        com.docker.compose.project: ecommerce-microservices
+        com.docker.compose.service: cart-db
+    ports:
+        - name: cart-db-5435
+          port: 5435
+          protocol: TCP
+          targetPort: cart-db-5432
+
+# check if there is at least one published port

@@ -1,0 +1,24 @@
+#! ecommerce-network-network-policy.yaml
+# Generated code, do not edit
+apiVersion: networking.k8s.io/v1
+kind: NetworkPolicy
+metadata:
+    name: ecommerce-network-network-policy
+    namespace: ecommerce-microservices
+spec:
+    podSelector:
+        matchLabels:
+            com.docker.compose.network.ecommerce-network: "true"
+    policyTypes:
+        - Ingress
+        - Egress
+    ingress:
+        - from:
+            - podSelector:
+                matchLabels:
+                    com.docker.compose.network.ecommerce-network: "true"
+    egress:
+        - to:
+            - podSelector:
+                matchLabels:
+                    com.docker.compose.network.ecommerce-network: "true"

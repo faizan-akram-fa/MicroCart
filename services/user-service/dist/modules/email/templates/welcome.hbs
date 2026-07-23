@@ -1,0 +1,122 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Welcome to MicroCart</title>
+    <style>
+        @import url('https://fonts.googleapis.com/css2?family=Outfit:wght@400;600;800&display=swap');
+        
+        body {
+            font-family: 'Outfit', 'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+            line-height: 1.7;
+            color: #1e293b;
+            margin: 0;
+            padding: 0;
+            background-color: #f1f5f9;
+        }
+        .wrapper {
+            width: 100%;
+            table-layout: fixed;
+            background-color: #f1f5f9;
+            padding-bottom: 40px;
+        }
+        .container {
+            max-width: 600px;
+            margin: 0 auto;
+            background: #ffffff;
+            border-radius: 32px;
+            overflow: hidden;
+            margin-top: 40px;
+            box-shadow: 0 20px 25px -5px rgba(0, 0, 0, 0.1), 0 10px 10px -5px rgba(0, 0, 0, 0.04);
+        }
+        .header {
+            background: linear-gradient(135deg, #6366f1 0%, #4f46e5 100%);
+            padding: 60px 40px;
+            text-align: center;
+            color: white;
+            position: relative;
+        }
+        .header-bg-accent {
+            position: absolute;
+            top: -20px;
+            right: -20px;
+            width: 150px;
+            height: 150px;
+            background: rgba(255, 255, 255, 0.1);
+            border-radius: 50%;
+        }
+        .logo {
+            font-size: 28px;
+            font-weight: 800;
+            letter-spacing: -1px;
+            margin-bottom: 10px;
+            display: block;
+        }
+        .logo span {
+            color: #a5b4fc;
+        }
+        .content {
+            padding: 50px 40px;
+            background-color: #ffffff;
+        }
+        .footer {
+            background: #f8fafc;
+            padding: 40px;
+            text-align: center;
+            font-size: 13px;
+            color: #94a3b8;
+            border-top: 1px solid #f1f5f9;
+        }
+        .button {
+            display: inline-block;
+            padding: 16px 32px;
+            background: linear-gradient(135deg, #6366f1 0%, #4f46e5 100%);
+            color: #ffffff !important;
+            text-decoration: none;
+            border-radius: 16px;
+            font-weight: 700;
+            margin-top: 30px;
+            box-shadow: 0 10px 15px -3px rgba(79, 70, 229, 0.3);
+        }
+        h1 { margin: 0; font-weight: 800; font-size: 32px; }
+        .greeting { font-size: 20px; font-weight: 700; color: #1e293b; margin-bottom: 15px; }
+    </style>
+</head>
+<body>
+    <div class="wrapper">
+        <div class="container">
+            <div class="header">
+                <div class="header-bg-accent"></div>
+                
+                                <!-- Premium CSS Logo -->
+                <div style="margin-bottom: 25px; text-align: center;">
+                    <div style="display: inline-block; width: 72px; height: 72px; background: rgba(255, 255, 255, 0.15); border: 2px solid rgba(255, 255, 255, 0.4); border-radius: 20px; box-shadow: 0 8px 32px rgba(0,0,0,0.15); position: relative; text-align: center; line-height: 72px;">
+                        <span style="font-size: 38px; vertical-align: middle;">🛍️</span>
+                        <div style="position: absolute; top: -4px; right: -4px; width: 14px; height: 14px; background: #fbbf24; border-radius: 50%; box-shadow: 0 0 10px rgba(251, 191, 36, 0.8);"></div>
+                    </div>
+                </div>
+                <div style="font-size: 36px; font-weight: 900; letter-spacing: -1.5px; color: #ffffff; font-family: 'Outfit', sans-serif; margin-bottom: 15px; text-align: center;">
+                    Micro<span style="color: #a5b4fc;">Cart</span><span style="color: #fbbf24;">.</span>
+                </div>
+                <h1>Welcome to the Future of Shopping! 🚀</h1>
+            </div>
+            <div class="content">
+                <p class="greeting">Hi {{name}},</p>
+                <p>We're absolutely thrilled to have you join <strong>MicroCart</strong>. You've just taken the first step towards a premium shopping and selling experience.</p>
+                <p>To give you the best experience, we need to know how you'd like to use our platform. Are you here to find amazing products, or to build your own business?</p>
+                <center>
+                    <a href="http://localhost:3000/role-selection" class="button">Select My Role & Start</a>
+                </center>
+                <p style="margin-top: 40px; font-size: 14px; color: #64748b; border-top: 1px solid #f1f5f9; padding-top: 20px;">
+                    Once you select your role, we'll guide you through the next steps to get the most out of MicroCart.
+                </p>
+            </div>
+            <div class="footer">
+                <p>&copy; 2026 MicroCart Inc. All rights reserved.</p>
+                <p>123 Commerce Way, Tech City, TC 54000</p>
+            </div>
+        </div>
+    </div>
+</body>
+</html>

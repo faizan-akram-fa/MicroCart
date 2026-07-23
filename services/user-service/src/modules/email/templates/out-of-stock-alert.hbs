@@ -1,0 +1,141 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Out of Stock Alert - MicroCart</title>
+    <style>
+        @import url('https://fonts.googleapis.com/css2?family=Outfit:wght@400;600;800&display=swap');
+        
+        body {
+            font-family: 'Outfit', 'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+            line-height: 1.7;
+            color: #1e293b;
+            margin: 0;
+            padding: 0;
+            background-color: #f1f5f9;
+        }
+        .wrapper {
+            width: 100%;
+            table-layout: fixed;
+            background-color: #f1f5f9;
+            padding: 40px 0;
+        }
+        .container {
+            max-width: 600px;
+            margin: 0 auto;
+            background: #ffffff;
+            border-radius: 32px;
+            overflow: hidden;
+            box-shadow: 0 20px 25px -5px rgba(0, 0, 0, 0.1);
+        }
+        .header {
+            padding: 60px 40px;
+            text-align: center;
+            color: white;
+            background: linear-gradient(135deg, #ef4444 0%, #b91c1c 100%);
+            position: relative;
+        }
+        .header-bg-accent {
+            position: absolute;
+            top: -20px;
+            right: -20px;
+            width: 150px;
+            height: 150px;
+            background: rgba(255, 255, 255, 0.1);
+            border-radius: 50%;
+        }
+        .logo {
+            font-size: 28px;
+            font-weight: 800;
+            letter-spacing: -1px;
+            margin-bottom: 10px;
+            display: block;
+        }
+        .logo span {
+            color: #fca5a5;
+        }
+        .content {
+            padding: 50px 40px;
+            text-align: center;
+            background-color: #ffffff;
+        }
+        h1 { margin: 0; font-weight: 800; font-size: 28px; line-height: 1.2; }
+        .alert-box {
+            background-color: #fef2f2;
+            border: 1px solid #fee2e2;
+            border-radius: 16px;
+            padding: 20px;
+            margin: 30px 0;
+        }
+        .product-name {
+            font-size: 20px;
+            font-weight: 700;
+            color: #991b1b;
+            margin: 10px 0;
+        }
+        .stock-level {
+            font-size: 32px;
+            font-weight: 800;
+            color: #b91c1c;
+            margin: 0;
+        }
+        .button {
+            display: inline-block;
+            padding: 16px 32px;
+            background: #b91c1c;
+            color: #ffffff !important;
+            text-decoration: none;
+            border-radius: 16px;
+            font-weight: 700;
+            margin-top: 20px;
+            box-shadow: 0 10px 15px -3px rgba(185, 28, 28, 0.3);
+        }
+        .footer {
+            background: #f8fafc;
+            padding: 40px;
+            text-align: center;
+            font-size: 13px;
+            color: #94a3b8;
+            border-top: 1px solid #f1f5f9;
+        }
+    </style>
+</head>
+<body>
+    <div class="wrapper">
+        <div class="container">
+            <div class="header">
+                <div class="header-bg-accent"></div>
+                                <!-- Premium CSS Logo -->
+                <div style="margin-bottom: 25px; text-align: center;">
+                    <div style="display: inline-block; width: 72px; height: 72px; background: rgba(255, 255, 255, 0.15); border: 2px solid rgba(255, 255, 255, 0.4); border-radius: 20px; box-shadow: 0 8px 32px rgba(0,0,0,0.15); position: relative; text-align: center; line-height: 72px;">
+                        <span style="font-size: 38px; vertical-align: middle;">🛍️</span>
+                        <div style="position: absolute; top: -4px; right: -4px; width: 14px; height: 14px; background: #fbbf24; border-radius: 50%; box-shadow: 0 0 10px rgba(251, 191, 36, 0.8);"></div>
+                    </div>
+                </div>
+                <div style="font-size: 36px; font-weight: 900; letter-spacing: -1.5px; color: #ffffff; font-family: 'Outfit', sans-serif; margin-bottom: 15px; text-align: center;">
+                    Micro<span style="color: #a5b4fc;">Cart</span><span style="color: #fbbf24;">.</span>
+                </div>
+                <h1>Out of Stock 🚨</h1>
+            </div>
+            <div class="content">
+                <p style="font-size: 18px; font-weight: 600; text-align: left;">Hi {{name}},</p>
+                <p style="text-align: left; color: #64748b;">This is an automated alert to inform you that one of your products is now completely out of stock. It will not be available for customers to purchase until you update your inventory.</p>
+                
+                <div class="alert-box">
+                    <p style="margin: 0; color: #64748b; font-size: 14px; text-transform: uppercase; letter-spacing: 1px; font-weight: 700;">Product</p>
+                    <p class="product-name">{{productName}}</p>
+                    <p style="margin: 15px 0 5px 0; color: #64748b; font-size: 14px; text-transform: uppercase; letter-spacing: 1px; font-weight: 700;">Remaining Stock</p>
+                    <p class="stock-level">0</p>
+                </div>
+
+                <a href="http://localhost:3000/seller/dashboard" class="button">Restock Now</a>
+            </div>
+            <div class="footer">
+                <p>&copy; 2026 MicroCart Inc. All rights reserved.</p>
+                <p>You received this automated alert as a registered seller on MicroCart.</p>
+            </div>
+        </div>
+    </div>
+</body>
+</html>

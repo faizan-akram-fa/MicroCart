@@ -1,0 +1,9 @@
+#! product-db-product-db-data-persistentVolumeClaim.yaml
+# Generated code, do not edit
+apiVersion: v1
+kind: PersistentVolumeClaim
+metadata:
+    name: product-db-product-db-data
+    namespace: ecommerce-microservices
+spec:
+    storageClassName: "hostpath" # see docker/desktop-storage-provisioner

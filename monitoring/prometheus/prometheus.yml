@@ -1,0 +1,77 @@
+global:
+  scrape_interval: 15s
+  evaluation_interval: 15s
+  external_labels:
+    project: 'ecommerce-microservices'
+    environment: 'development'
+
+scrape_configs:
+  # ── API Gateway ──────────────────────────────────────────────────────────────
+  - job_name: 'api-gateway'
+    static_configs:
+      - targets: ['api-gateway:4000']
+        labels:
+          service: 'api-gateway'
+    metrics_path: '/metrics'
+    scrape_interval: 10s
+
+  # ── User Service ─────────────────────────────────────────────────────────────
+  - job_name: 'user-service'
+    static_configs:
+      - targets: ['user-service:3001']
+        labels:
+          service: 'user-service'
+    metrics_path: '/metrics'
+    scrape_interval: 10s
+
+  # ── Product Service ───────────────────────────────────────────────────────────
+  - job_name: 'product-service'
+    static_configs:
+      - targets: ['product-service:3002']
+        labels:
+          service: 'product-service'
+    metrics_path: '/metrics'
+    scrape_interval: 10s
+
+  # ── Cart Service ──────────────────────────────────────────────────────────────
+  - job_name: 'cart-service'
+    static_configs:
+      - targets: ['cart-service:3003']
+        labels:
+          service: 'cart-service'
+    metrics_path: '/metrics'
+    scrape_interval: 10s
+
+  # ── Order Service ─────────────────────────────────────────────────────────────
+  - job_name: 'order-service'
+    static_configs:
+      - targets: ['order-service:3004']
+        labels:
+          service: 'order-service'
+    metrics_path: '/metrics'
+    scrape_interval: 10s
+
+  # ── Wishlist Service ──────────────────────────────────────────────────────────
+  - job_name: 'wishlist-service'
+    static_configs:
+      - targets: ['wishlist-service:3005']
+        labels:
+          service: 'wishlist-service'
+    metrics_path: '/metrics'
+    scrape_interval: 10s
+
+  # ── Support Service ───────────────────────────────────────────────────────────
+  - job_name: 'support-service'
+    static_configs:
+      - targets: ['support-service:3006']
+        labels:
+          service: 'support-service'
+    metrics_path: '/metrics'
+    scrape_interval: 10s
+
+  # ── Prometheus Self-Monitoring ────────────────────────────────────────────────
+  - job_name: 'prometheus'
+    static_configs:
+      - targets: ['localhost:9090']
+        labels:
+          service: 'prometheus'

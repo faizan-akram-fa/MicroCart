@@ -1,0 +1,50 @@
+#! user-service-deployment.yaml
+# Generated code, do not edit
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+    name: user-service
+    namespace: ecommerce-microservices
+    labels:
+        com.docker.compose.project: ecommerce-microservices
+        com.docker.compose.service: user-service
+spec:
+    replicas: 1
+    selector:
+        matchLabels:
+            com.docker.compose.project: ecommerce-microservices
+            com.docker.compose.service: user-service
+    strategy:
+        type: Recreate
+    template:
+        metadata:
+            labels:
+                com.docker.compose.project: ecommerce-microservices
+                com.docker.compose.service: user-service
+                com.docker.compose.network.ecommerce-network: "true"
+        spec:
+            restartPolicy: unless-stopped
+            containers:
+                - name: user-service
+                  image: ecommerce-microservices-user-service
+                  imagePullPolicy: IfNotPresent
+                  env:
+                    - name: DB_HOST
+                      value: "user-db"
+                    - name: DB_NAME
+                      value: "user_db"
+                    - name: DB_PASSWORD
+                      value: "postgres"
+                    - name: DB_PORT
+                      value: "5432"
+                    - name: DB_USERNAME
+                      value: "postgres"
+                    - name: FRONTEND_URL
+                      value: "http://localhost:3000"
+                    - name: JWT_SECRET
+                      value: "your-secret-key-change-in-production-make-it-long-and-random"
+                    - name: PORT
+                      value: "3001"
+                  ports:
+                    - name: user-servi-3001
+                      containerPort: 3001

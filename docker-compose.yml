@@ -1,0 +1,349 @@
+version: '3.8'
+
+services:
+  # ==================== DATABASES ====================
+  user-db:
+    image: postgres:15-alpine
+    environment:
+      POSTGRES_USER: postgres
+      POSTGRES_PASSWORD: postgres
+      POSTGRES_DB: user_db
+    ports:
+      - "5433:5432"
+    volumes:
+      - user-db-data:/var/lib/postgresql/data
+    networks:
+      - ecommerce-network
+
+  product-db:
+    image: postgres:15-alpine
+    environment:
+      POSTGRES_USER: postgres
+      POSTGRES_PASSWORD: postgres
+      POSTGRES_DB: product_db
+    ports:
+      - "5434:5432"
+    volumes:
+      - product-db-data:/var/lib/postgresql/data
+    networks:
+      - ecommerce-network
+
+  cart-db:
+    image: postgres:15-alpine
+    environment:
+      POSTGRES_USER: postgres
+      POSTGRES_PASSWORD: postgres
+      POSTGRES_DB: cart_db
+    ports:
+      - "5435:5432"
+    volumes:
+      - cart-db-data:/var/lib/postgresql/data
+    networks:
+      - ecommerce-network
+
+  order-db:
+    image: postgres:15-alpine
+    environment:
+      POSTGRES_USER: postgres
+      POSTGRES_PASSWORD: postgres
+      POSTGRES_DB: order_db
+    ports:
+      - "5436:5432"
+    volumes:
+      - order-db-data:/var/lib/postgresql/data
+    networks:
+      - ecommerce-network
+
+  wishlist-db:
+    image: postgres:15-alpine
+    environment:
+      POSTGRES_USER: postgres
+      POSTGRES_PASSWORD: postgres
+      POSTGRES_DB: wishlist_db
+    ports:
+      - "5437:5432"
+    volumes:
+      - wishlist-db-data:/var/lib/postgresql/data
+    networks:
+      - ecommerce-network
+
+  support-db:
+    image: postgres:15-alpine
+    environment:
+      POSTGRES_USER: postgres
+      POSTGRES_PASSWORD: postgres
+      POSTGRES_DB: support_db
+    ports:
+      - "5438:5432"
+    volumes:
+      - support-db-data:/var/lib/postgresql/data
+    networks:
+      - ecommerce-network
+
+  # ==================== MICROSERVICES ====================
+  user-service:
+    build: ./services/user-service
+    ports:
+      - "3001:3001"
+    environment:
+      - PORT=3001
+      - DB_HOST=user-db
+      - DB_PORT=5432
+      - DB_USERNAME=postgres
+      - DB_PASSWORD=postgres
+      - DB_NAME=user_db
+      - JWT_SECRET=your-secret-key-change-in-production-make-it-long-and-random
+      - FRONTEND_URL=http://localhost:3000
+      - GOOGLE_CLIENT_ID=77155637336-e6i15osultvdih4h7kl6ej33uttd23c0.apps.googleusercontent.com
+      - GOOGLE_CLIENT_SECRET=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
+      - GOOGLE_CALLBACK_URL=http://localhost:4000/api/auth/google/callback
+      - ORDER_SERVICE_URL=http://order-service:3004
+    depends_on:
+      - user-db
+    networks:
+      - ecommerce-network
+    restart: unless-stopped
+
+  product-service:
+    build: ./services/product-service
+    ports:
+      - "3002:3002"
+    environment:
+      - PORT=3002
+      - DB_HOST=product-db
+      - DB_PORT=5432
+      - DB_USERNAME=postgres
+      - DB_PASSWORD=postgres
+      - DB_NAME=product_db
+      - USER_SERVICE_URL=http://user-service:3001
+      - FRONTEND_URL=http://localhost:3000
+      - API_URL=http://localhost:3002
+    depends_on:
+      - product-db
+      - user-service
+    networks:
+      - ecommerce-network
+    restart: unless-stopped
+
+  cart-service:
+    build: ./services/cart-service
+    ports:
+      - "3003:3003"
+    environment:
+      - PORT=3003
+      - DB_HOST=cart-db
+      - DB_PORT=5432
+      - DB_USERNAME=postgres
+      - DB_PASSWORD=postgres
+      - DB_NAME=cart_db
+      - USER_SERVICE_URL=http://user-service:3001
+      - PRODUCT_SERVICE_URL=http://product-service:3002
+      - FRONTEND_URL=http://localhost:3000
+    depends_on:
+      - cart-db
+      - user-service
+      - product-service
+    networks:
+      - ecommerce-network
+    restart: unless-stopped
+
+  order-service:
+    build: ./services/order-service
+    ports:
+      - "3004:3004"
+    environment:
+      - PORT=3004
+      - DB_HOST=order-db
+      - DB_PORT=5432
+      - DB_USERNAME=postgres
+      - DB_PASSWORD=postgres
+      - DB_NAME=order_db
+      - USER_SERVICE_URL=http://user-service:3001
+      - PRODUCT_SERVICE_URL=http://product-service:3002
+      - CART_SERVICE_URL=http://cart-service:3003
+      - FRONTEND_URL=http://localhost:3000
+    depends_on:
+      - order-db
+      - user-service
+      - product-service
+      - cart-service
+    networks:
+      - ecommerce-network
+    restart: unless-stopped
+
+  wishlist-service:
+    build: ./services/wishlist-service
+    ports:
+      - "3005:3005"
+    environment:
+      - PORT=3005
+      - DB_HOST=wishlist-db
+      - DB_PORT=5432
+      - DB_USERNAME=postgres
+      - DB_PASSWORD=postgres
+      - DB_NAME=wishlist_db
+      - USER_SERVICE_URL=http://user-service:3001
+      - PRODUCT_SERVICE_URL=http://product-service:3002
+      - FRONTEND_URL=http://localhost:3000
+    depends_on:
+      - wishlist-db
+      - user-service
+      - product-service
+    networks:
+      - ecommerce-network
+    restart: unless-stopped
+
+  support-service:
+    build: ./services/support-service
+    ports:
+      - "3006:3006"
+    environment:
+      - PORT=3006
+      - DB_HOST=support-db
+      - DB_PORT=5432
+      - DB_USERNAME=postgres
+      - DB_PASSWORD=postgres
+      - DB_NAME=support_db
+      - USER_SERVICE_URL=http://user-service:3001
+      - PRODUCT_SERVICE_URL=http://product-service:3002
+      - ORDER_SERVICE_URL=http://order-service:3004
+      - FRONTEND_URL=http://localhost:3000
+      - INTERNAL_SERVICE_SECRET=microservices-secret-123
+    depends_on:
+      - support-db
+      - user-service
+      - product-service
+      - order-service
+    networks:
+      - ecommerce-network
+    restart: unless-stopped
+
+  api-gateway:
+    build: ./services/api-gateway
+    ports:
+      - "4000:4000"
+    environment:
+      - PORT=4000
+      - USER_SERVICE_URL=http://user-service:3001
+      - PRODUCT_SERVICE_URL=http://product-service:3002
+      - CART_SERVICE_URL=http://cart-service:3003
+      - ORDER_SERVICE_URL=http://order-service:3004
+      - WISHLIST_SERVICE_URL=http://wishlist-service:3005
+      - SUPPORT_SERVICE_URL=http://support-service:3006
+      - FRONTEND_URL=http://localhost:3000
+    depends_on:
+      - user-service
+      - product-service
+      - cart-service
+      - order-service
+      - wishlist-service
+      - support-service
+    networks:
+      - ecommerce-network
+    restart: unless-stopped
+
+  frontend:
+    build:
+      context: ./frontend
+      target: deps
+      args:
+        - NEXT_PUBLIC_API_URL=http://localhost:4000/api
+    ports:
+      - "3000:3000"
+    command: npm run dev
+    volumes:
+      - ./frontend:/app
+      - /app/.next
+    environment:
+      - NEXT_PUBLIC_API_URL=http://localhost:4000/api
+      - INTERNAL_API_URL=http://api-gateway:4000/api
+      - INTERNAL_USER_SERVICE_URL=http://user-service:3001
+      - INTERNAL_PRODUCT_SERVICE_URL=http://product-service:3002
+    networks:
+      - ecommerce-network
+    restart: unless-stopped
+
+  # ==================== MONITORING STACK ====================
+  prometheus:
+    image: prom/prometheus:v2.50.1
+    container_name: prometheus
+    ports:
+      - "9090:9090"
+    volumes:
+      - ./monitoring/prometheus/prometheus.yml:/etc/prometheus/prometheus.yml:ro
+      - prometheus-data:/prometheus
+    command:
+      - '--config.file=/etc/prometheus/prometheus.yml'
+      - '--storage.tsdb.path=/prometheus'
+      - '--storage.tsdb.retention.time=15d'
+      - '--web.enable-lifecycle'
+      - '--web.console.libraries=/etc/prometheus/console_libraries'
+      - '--web.console.templates=/etc/prometheus/consoles'
+    networks:
+      - ecommerce-network
+    restart: unless-stopped
+
+  grafana:
+    image: grafana/grafana:10.3.3
+    container_name: grafana
+    ports:
+      - "3010:3010"
+    environment:
+      - GF_SERVER_HTTP_PORT=3010
+      - GF_SECURITY_ADMIN_USER=admin
+      - GF_SECURITY_ADMIN_PASSWORD=admin123
+      - GF_USERS_ALLOW_SIGN_UP=false
+      - GF_AUTH_ANONYMOUS_ENABLED=false
+      - GF_ANALYTICS_REPORTING_ENABLED=false
+    volumes:
+      - grafana-data:/var/lib/grafana
+      - ./monitoring/grafana/provisioning:/etc/grafana/provisioning:ro
+    networks:
+      - ecommerce-network
+    depends_on:
+      - prometheus
+      - loki
+    restart: unless-stopped
+
+  loki:
+    image: grafana/loki:2.9.5
+    container_name: loki
+    ports:
+      - "3100:3100"
+    volumes:
+      - ./monitoring/loki/loki-config.yml:/etc/loki/local-config.yaml:ro
+      - loki-data:/loki
+    command: -config.file=/etc/loki/local-config.yaml
+    networks:
+      - ecommerce-network
+    restart: unless-stopped
+
+  promtail:
+    image: grafana/promtail:2.9.5
+    container_name: promtail
+    volumes:
+      - ./monitoring/promtail/promtail-config.yml:/etc/promtail/config.yml:ro
+      - /var/run/docker.sock:/var/run/docker.sock:ro
+      - /var/lib/docker/containers:/var/lib/docker/containers:ro
+    command: -config.file=/etc/promtail/config.yml
+    networks:
+      - ecommerce-network
+    depends_on:
+      - loki
+    restart: unless-stopped
+
+networks:
+  ecommerce-network:
+    driver: bridge
+
+volumes:
+  user-db-data:
+  product-db-data:
+  cart-db-data:
+  order-db-data:
+  wishlist-db-data:
+  support-db-data:
+  # ── Monitoring Volumes ──────────────────────────────────────────────────────
+  prometheus-data:
+  grafana-data:
+  loki-data:

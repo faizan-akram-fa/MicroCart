@@ -1,0 +1,21 @@
+#! wishlist-db-service.yaml
+# Generated code, do not edit
+apiVersion: v1
+kind: Service
+metadata:
+    name: wishlist-db-published
+    namespace: ecommerce-microservices
+    labels:
+        com.docker.compose.project: ecommerce-microservices
+        com.docker.compose.service: wishlist-db
+spec:
+    selector:
+        com.docker.compose.project: ecommerce-microservices
+        com.docker.compose.service: wishlist-db
+    ports:
+        - name: wishlist-d-5437
+          port: 5437
+          protocol: TCP
+          targetPort: wishlist-d-5432
+
+# check if there is at least one published port

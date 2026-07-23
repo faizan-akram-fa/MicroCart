@@ -1,0 +1,329 @@
+{
+  "annotations": { "list": [] },
+  "description": "MicroCart E-Commerce Microservices — Real-time HTTP metrics, Node.js runtime stats, and live container logs",
+  "editable": true,
+  "fiscalYearStartMonth": 0,
+  "graphTooltip": 1,
+  "id": null,
+  "links": [],
+  "panels": [
+    {
+      "collapsed": false,
+      "gridPos": { "h": 1, "w": 24, "x": 0, "y": 0 },
+      "id": 100,
+      "title": "📊 Platform Overview",
+      "type": "row"
+    },
+    {
+      "datasource": { "type": "prometheus", "uid": "prometheus-ds" },
+      "fieldConfig": {
+        "defaults": {
+          "color": { "mode": "thresholds" },
+          "thresholds": { "mode": "absolute", "steps": [{ "color": "green", "value": null }] },
+          "unit": "reqps"
+        },
+        "overrides": []
+      },
+      "gridPos": { "h": 4, "w": 4, "x": 0, "y": 1 },
+      "id": 1,
+      "options": { "colorMode": "background", "graphMode": "area", "justifyMode": "center", "orientation": "auto", "reduceOptions": { "calcs": ["lastNotNull"] } },
+      "title": "Total Requests/sec",
+      "type": "stat",
+      "targets": [{ "expr": "sum(rate(http_requests_total[1m]))", "legendFormat": "Req/s", "refId": "A" }]
+    },
+    {
+      "datasource": { "type": "prometheus", "uid": "prometheus-ds" },
+      "fieldConfig": {
+        "defaults": {
+          "color": { "mode": "thresholds" },
+          "thresholds": { "mode": "absolute", "steps": [{ "color": "green", "value": null }, { "color": "yellow", "value": 0.01 }, { "color": "red", "value": 0.05 }] },
+          "unit": "percentunit"
+        },
+        "overrides": []
+      },
+      "gridPos": { "h": 4, "w": 4, "x": 4, "y": 1 },
+      "id": 2,
+      "options": { "colorMode": "background", "graphMode": "none", "justifyMode": "center", "orientation": "auto", "reduceOptions": { "calcs": ["lastNotNull"] } },
+      "title": "Overall Error Rate",
+      "type": "stat",
+      "targets": [{ "expr": "sum(rate(http_requests_total{status_code=~\"5..\"}[5m])) / sum(rate(http_requests_total[5m]))", "legendFormat": "Error Rate", "refId": "A" }]
+    },
+    {
+      "datasource": { "type": "prometheus", "uid": "prometheus-ds" },
+      "fieldConfig": {
+        "defaults": {
+          "color": { "mode": "thresholds" },
+          "thresholds": { "mode": "absolute", "steps": [{ "color": "green", "value": null }, { "color": "yellow", "value": 500 }, { "color": "red", "value": 1000 }] },
+          "unit": "ms"
+        },
+        "overrides": []
+      },
+      "gridPos": { "h": 4, "w": 4, "x": 8, "y": 1 },
+      "id": 3,
+      "options": { "colorMode": "background", "graphMode": "none", "justifyMode": "center", "orientation": "auto", "reduceOptions": { "calcs": ["lastNotNull"] } },
+      "title": "Avg Response Time (p95)",
+      "type": "stat",
+      "targets": [{ "expr": "histogram_quantile(0.95, sum(rate(http_request_duration_ms_bucket[5m])) by (le)) ", "legendFormat": "p95", "refId": "A" }]
+    },
+    {
+      "datasource": { "type": "prometheus", "uid": "prometheus-ds" },
+      "fieldConfig": {
+        "defaults": {
+          "color": { "mode": "thresholds" },
+          "thresholds": { "mode": "absolute", "steps": [{ "color": "green", "value": null }, { "color": "yellow", "value": 300 }, { "color": "red", "value": 500 }] },
+          "unit": "decmbytes"
+        },
+        "overrides": []
+      },
+      "gridPos": { "h": 4, "w": 4, "x": 12, "y": 1 },
+      "id": 4,
+      "options": { "colorMode": "background", "graphMode": "area", "justifyMode": "center", "orientation": "auto", "reduceOptions": { "calcs": ["lastNotNull"] } },
+      "title": "Total Heap Used",
+      "type": "stat",
+      "targets": [{ "expr": "sum(nodejs_heap_size_used_bytes) / 1024 / 1024", "legendFormat": "Heap MB", "refId": "A" }]
+    },
+    {
+      "datasource": { "type": "prometheus", "uid": "prometheus-ds" },
+      "fieldConfig": {
+        "defaults": { "color": { "mode": "thresholds" }, "thresholds": { "mode": "absolute", "steps": [{ "color": "green", "value": null }] }, "unit": "short" },
+        "overrides": []
+      },
+      "gridPos": { "h": 4, "w": 4, "x": 16, "y": 1 },
+      "id": 5,
+      "options": { "colorMode": "background", "graphMode": "none", "justifyMode": "center", "orientation": "auto", "reduceOptions": { "calcs": ["lastNotNull"] } },
+      "title": "Services UP",
+      "type": "stat",
+      "targets": [{ "expr": "count(up == 1)", "legendFormat": "Up", "refId": "A" }]
+    },
+    {
+      "datasource": { "type": "prometheus", "uid": "prometheus-ds" },
+      "fieldConfig": {
+        "defaults": { "color": { "mode": "palette-classic" }, "custom": { "lineWidth": 2, "fillOpacity": 10 }, "unit": "reqps" },
+        "overrides": []
+      },
+      "gridPos": { "h": 8, "w": 12, "x": 0, "y": 5 },
+      "id": 10,
+      "title": "HTTP Request Rate — All Services",
+      "type": "timeseries",
+      "targets": [
+        { "expr": "rate(http_requests_total{service=\"user-service\"}[1m])", "legendFormat": "user-service", "refId": "A" },
+        { "expr": "rate(http_requests_total{service=\"product-service\"}[1m])", "legendFormat": "product-service", "refId": "B" },
+        { "expr": "rate(http_requests_total{service=\"cart-service\"}[1m])", "legendFormat": "cart-service", "refId": "C" },
+        { "expr": "rate(http_requests_total{service=\"order-service\"}[1m])", "legendFormat": "order-service", "refId": "D" },
+        { "expr": "rate(http_requests_total{service=\"wishlist-service\"}[1m])", "legendFormat": "wishlist-service", "refId": "E" },
+        { "expr": "rate(http_requests_total{service=\"support-service\"}[1m])", "legendFormat": "support-service", "refId": "F" }
+      ],
+      "options": { "tooltip": { "mode": "multi" }, "legend": { "displayMode": "table", "placement": "bottom" } }
+    },
+    {
+      "datasource": { "type": "prometheus", "uid": "prometheus-ds" },
+      "fieldConfig": {
+        "defaults": { "color": { "mode": "palette-classic" }, "custom": { "lineWidth": 2, "fillOpacity": 10 }, "unit": "ms" },
+        "overrides": []
+      },
+      "gridPos": { "h": 8, "w": 12, "x": 12, "y": 5 },
+      "id": 11,
+      "title": "Response Time p95 — All Services",
+      "type": "timeseries",
+      "targets": [
+        { "expr": "histogram_quantile(0.95, sum(rate(http_request_duration_ms_bucket{service=\"user-service\"}[5m])) by (le))", "legendFormat": "user-service p95", "refId": "A" },
+        { "expr": "histogram_quantile(0.95, sum(rate(http_request_duration_ms_bucket{service=\"product-service\"}[5m])) by (le))", "legendFormat": "product-service p95", "refId": "B" },
+        { "expr": "histogram_quantile(0.95, sum(rate(http_request_duration_ms_bucket{service=\"cart-service\"}[5m])) by (le))", "legendFormat": "cart-service p95", "refId": "C" },
+        { "expr": "histogram_quantile(0.95, sum(rate(http_request_duration_ms_bucket{service=\"order-service\"}[5m])) by (le))", "legendFormat": "order-service p95", "refId": "D" },
+        { "expr": "histogram_quantile(0.95, sum(rate(http_request_duration_ms_bucket{service=\"wishlist-service\"}[5m])) by (le))", "legendFormat": "wishlist-service p95", "refId": "E" },
+        { "expr": "histogram_quantile(0.95, sum(rate(http_request_duration_ms_bucket{service=\"support-service\"}[5m])) by (le))", "legendFormat": "support-service p95", "refId": "F" }
+      ],
+      "options": { "tooltip": { "mode": "multi" }, "legend": { "displayMode": "table", "placement": "bottom" } }
+    },
+    {
+      "collapsed": false,
+      "gridPos": { "h": 1, "w": 24, "x": 0, "y": 13 },
+      "id": 101,
+      "title": "🧠 Node.js Runtime — Memory & CPU",
+      "type": "row"
+    },
+    {
+      "datasource": { "type": "prometheus", "uid": "prometheus-ds" },
+      "fieldConfig": {
+        "defaults": { "color": { "mode": "palette-classic" }, "custom": { "lineWidth": 1, "fillOpacity": 20 }, "unit": "decmbytes" },
+        "overrides": []
+      },
+      "gridPos": { "h": 8, "w": 12, "x": 0, "y": 14 },
+      "id": 20,
+      "title": "Heap Memory Used — Per Service",
+      "type": "timeseries",
+      "targets": [
+        { "expr": "nodejs_heap_size_used_bytes{service=\"user-service\"} / 1024 / 1024", "legendFormat": "user-service", "refId": "A" },
+        { "expr": "nodejs_heap_size_used_bytes{service=\"product-service\"} / 1024 / 1024", "legendFormat": "product-service", "refId": "B" },
+        { "expr": "nodejs_heap_size_used_bytes{service=\"cart-service\"} / 1024 / 1024", "legendFormat": "cart-service", "refId": "C" },
+        { "expr": "nodejs_heap_size_used_bytes{service=\"order-service\"} / 1024 / 1024", "legendFormat": "order-service", "refId": "D" },
+        { "expr": "nodejs_heap_size_used_bytes{service=\"wishlist-service\"} / 1024 / 1024", "legendFormat": "wishlist-service", "refId": "E" },
+        { "expr": "nodejs_heap_size_used_bytes{service=\"support-service\"} / 1024 / 1024", "legendFormat": "support-service", "refId": "F" }
+      ]
+    },
+    {
+      "datasource": { "type": "prometheus", "uid": "prometheus-ds" },
+      "fieldConfig": {
+        "defaults": { "color": { "mode": "palette-classic" }, "custom": { "lineWidth": 1, "fillOpacity": 20 }, "unit": "percentunit", "max": 1 },
+        "overrides": []
+      },
+      "gridPos": { "h": 8, "w": 12, "x": 12, "y": 14 },
+      "id": 21,
+      "title": "CPU Usage — Per Service",
+      "type": "timeseries",
+      "targets": [
+        { "expr": "rate(process_cpu_seconds_total{service=\"user-service\"}[1m])", "legendFormat": "user-service", "refId": "A" },
+        { "expr": "rate(process_cpu_seconds_total{service=\"product-service\"}[1m])", "legendFormat": "product-service", "refId": "B" },
+        { "expr": "rate(process_cpu_seconds_total{service=\"cart-service\"}[1m])", "legendFormat": "cart-service", "refId": "C" },
+        { "expr": "rate(process_cpu_seconds_total{service=\"order-service\"}[1m])", "legendFormat": "order-service", "refId": "D" },
+        { "expr": "rate(process_cpu_seconds_total{service=\"wishlist-service\"}[1m])", "legendFormat": "wishlist-service", "refId": "E" },
+        { "expr": "rate(process_cpu_seconds_total{service=\"support-service\"}[1m])", "legendFormat": "support-service", "refId": "F" }
+      ]
+    },
+    {
+      "collapsed": false,
+      "gridPos": { "h": 1, "w": 24, "x": 0, "y": 22 },
+      "id": 102,
+      "title": "⚠️ Errors & HTTP Status Codes",
+      "type": "row"
+    },
+    {
+      "datasource": { "type": "prometheus", "uid": "prometheus-ds" },
+      "fieldConfig": {
+        "defaults": { "color": { "mode": "palette-classic" }, "custom": { "lineWidth": 2 }, "unit": "reqps" },
+        "overrides": []
+      },
+      "gridPos": { "h": 8, "w": 12, "x": 0, "y": 23 },
+      "id": 30,
+      "title": "HTTP 4xx Errors — Per Service",
+      "type": "timeseries",
+      "targets": [
+        { "expr": "rate(http_requests_total{status_code=~\"4..\",service=\"user-service\"}[5m])", "legendFormat": "user-service 4xx", "refId": "A" },
+        { "expr": "rate(http_requests_total{status_code=~\"4..\",service=\"product-service\"}[5m])", "legendFormat": "product-service 4xx", "refId": "B" },
+        { "expr": "rate(http_requests_total{status_code=~\"4..\",service=\"order-service\"}[5m])", "legendFormat": "order-service 4xx", "refId": "C" },
+        { "expr": "rate(http_requests_total{status_code=~\"4..\",service=\"cart-service\"}[5m])", "legendFormat": "cart-service 4xx", "refId": "D" }
+      ]
+    },
+    {
+      "datasource": { "type": "prometheus", "uid": "prometheus-ds" },
+      "fieldConfig": {
+        "defaults": { "color": { "mode": "palette-classic" }, "custom": { "lineWidth": 2 }, "unit": "reqps" },
+        "overrides": [{ "matcher": { "id": "byName", "options": "5xx Errors" }, "properties": [{ "id": "color", "value": { "fixedColor": "red", "mode": "fixed" } }] }]
+      },
+      "gridPos": { "h": 8, "w": 12, "x": 12, "y": 23 },
+      "id": 31,
+      "title": "HTTP 5xx Errors — Per Service",
+      "type": "timeseries",
+      "targets": [
+        { "expr": "rate(http_requests_total{status_code=~\"5..\",service=\"user-service\"}[5m])", "legendFormat": "user-service 5xx", "refId": "A" },
+        { "expr": "rate(http_requests_total{status_code=~\"5..\",service=\"product-service\"}[5m])", "legendFormat": "product-service 5xx", "refId": "B" },
+        { "expr": "rate(http_requests_total{status_code=~\"5..\",service=\"order-service\"}[5m])", "legendFormat": "order-service 5xx", "refId": "C" },
+        { "expr": "rate(http_requests_total{status_code=~\"5..\",service=\"cart-service\"}[5m])", "legendFormat": "cart-service 5xx", "refId": "D" }
+      ]
+    },
+    {
+      "collapsed": false,
+      "gridPos": { "h": 1, "w": 24, "x": 0, "y": 31 },
+      "id": 103,
+      "title": "📝 Live Container Logs",
+      "type": "row"
+    },
+    {
+      "datasource": { "type": "loki", "uid": "loki-ds" },
+      "gridPos": { "h": 10, "w": 12, "x": 0, "y": 32 },
+      "id": 40,
+      "title": "Live Logs — All Services",
+      "type": "logs",
+      "options": { "dedupStrategy": "none", "enableLogDetails": true, "prettifyLogMessage": false, "showCommonLabels": false, "showLabels": true, "showTime": true, "sortOrder": "Descending", "wrapLogMessage": true },
+      "targets": [{ "expr": "{service=~\".+\"}", "legendFormat": "", "refId": "A" }]
+    },
+    {
+      "datasource": { "type": "loki", "uid": "loki-ds" },
+      "gridPos": { "h": 10, "w": 12, "x": 12, "y": 32 },
+      "id": 41,
+      "title": "Error Logs — All Services",
+      "type": "logs",
+      "options": { "dedupStrategy": "none", "enableLogDetails": true, "prettifyLogMessage": false, "showLabels": true, "showTime": true, "sortOrder": "Descending", "wrapLogMessage": true },
+      "targets": [{ "expr": "{service=~\".+\"} |=~ \"(?i)error|exception|fail\"", "legendFormat": "", "refId": "A" }]
+    },
+    {
+      "collapsed": false,
+      "gridPos": { "h": 1, "w": 24, "x": 0, "y": 42 },
+      "id": 104,
+      "title": "🔍 Individual Microservice Logs",
+      "type": "row"
+    },
+    {
+      "datasource": { "type": "loki", "uid": "loki-ds" },
+      "gridPos": { "h": 10, "w": 12, "x": 0, "y": 43 },
+      "id": 42,
+      "title": "🌐 API Gateway Logs",
+      "type": "logs",
+      "options": { "dedupStrategy": "none", "enableLogDetails": true, "showLabels": true, "showTime": true, "sortOrder": "Descending", "wrapLogMessage": true },
+      "targets": [{ "expr": "{service=~\"api-gateway.*\"} | {container=~\".*api-gateway.*\"}", "legendFormat": "", "refId": "A" }]
+    },
+    {
+      "datasource": { "type": "loki", "uid": "loki-ds" },
+      "gridPos": { "h": 10, "w": 12, "x": 12, "y": 43 },
+      "id": 43,
+      "title": "👤 User Service Logs",
+      "type": "logs",
+      "options": { "dedupStrategy": "none", "enableLogDetails": true, "showLabels": true, "showTime": true, "sortOrder": "Descending", "wrapLogMessage": true },
+      "targets": [{ "expr": "{service=~\"user-service.*\"} | {container=~\".*user-service.*\"}", "legendFormat": "", "refId": "A" }]
+    },
+    {
+      "datasource": { "type": "loki", "uid": "loki-ds" },
+      "gridPos": { "h": 10, "w": 12, "x": 0, "y": 53 },
+      "id": 44,
+      "title": "📦 Product Service Logs",
+      "type": "logs",
+      "options": { "dedupStrategy": "none", "enableLogDetails": true, "showLabels": true, "showTime": true, "sortOrder": "Descending", "wrapLogMessage": true },
+      "targets": [{ "expr": "{service=~\"product-service.*\"} | {container=~\".*product-service.*\"}", "legendFormat": "", "refId": "A" }]
+    },
+    {
+      "datasource": { "type": "loki", "uid": "loki-ds" },
+      "gridPos": { "h": 10, "w": 12, "x": 12, "y": 53 },
+      "id": 45,
+      "title": "🛒 Order Service Logs",
+      "type": "logs",
+      "options": { "dedupStrategy": "none", "enableLogDetails": true, "showLabels": true, "showTime": true, "sortOrder": "Descending", "wrapLogMessage": true },
+      "targets": [{ "expr": "{service=~\"order-service.*\"} | {container=~\".*order-service.*\"}", "legendFormat": "", "refId": "A" }]
+    },
+    {
+      "datasource": { "type": "loki", "uid": "loki-ds" },
+      "gridPos": { "h": 10, "w": 12, "x": 0, "y": 63 },
+      "id": 46,
+      "title": "🛍️ Cart Service Logs",
+      "type": "logs",
+      "options": { "dedupStrategy": "none", "enableLogDetails": true, "showLabels": true, "showTime": true, "sortOrder": "Descending", "wrapLogMessage": true },
+      "targets": [{ "expr": "{service=~\"cart-service.*\"} | {container=~\".*cart-service.*\"}", "legendFormat": "", "refId": "A" }]
+    },
+    {
+      "datasource": { "type": "loki", "uid": "loki-ds" },
+      "gridPos": { "h": 10, "w": 12, "x": 12, "y": 63 },
+      "id": 47,
+      "title": "❤️ Wishlist Service Logs",
+      "type": "logs",
+      "options": { "dedupStrategy": "none", "enableLogDetails": true, "showLabels": true, "showTime": true, "sortOrder": "Descending", "wrapLogMessage": true },
+      "targets": [{ "expr": "{service=~\"wishlist-service.*\"} | {container=~\".*wishlist-service.*\"}", "legendFormat": "", "refId": "A" }]
+    },
+    {
+      "datasource": { "type": "loki", "uid": "loki-ds" },
+      "gridPos": { "h": 10, "w": 24, "x": 0, "y": 73 },
+      "id": 48,
+      "title": "💬 Support Service Logs",
+      "type": "logs",
+      "options": { "dedupStrategy": "none", "enableLogDetails": true, "showLabels": true, "showTime": true, "sortOrder": "Descending", "wrapLogMessage": true },
+      "targets": [{ "expr": "{service=~\"support-service.*\"} | {container=~\".*support-service.*\"}", "legendFormat": "", "refId": "A" }]
+    }
+  ],
+  "refresh": "10s",
+  "schemaVersion": 38,
+  "tags": ["microservices", "ecommerce", "microcart"],
+  "time": { "from": "now-1h", "to": "now" },
+  "timepicker": {},
+  "timezone": "browser",
+  "title": "MicroCart — Microservices Monitoring",
+  "uid": "microcart-monitoring",
+  "version": 3
+}

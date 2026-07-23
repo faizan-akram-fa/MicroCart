@@ -1,0 +1,46 @@
+#! order-db-deployment.yaml
+# Generated code, do not edit
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+    name: order-db
+    namespace: ecommerce-microservices
+    labels:
+        com.docker.compose.project: ecommerce-microservices
+        com.docker.compose.service: order-db
+spec:
+    replicas: 1
+    selector:
+        matchLabels:
+            com.docker.compose.project: ecommerce-microservices
+            com.docker.compose.service: order-db
+    strategy:
+        type: Recreate
+    template:
+        metadata:
+            labels:
+                com.docker.compose.project: ecommerce-microservices
+                com.docker.compose.service: order-db
+                com.docker.compose.network.ecommerce-network: "true"
+        spec:
+            containers:
+                - name: order-db
+                  image: postgres:15-alpine
+                  imagePullPolicy: IfNotPresent
+                  env:
+                    - name: POSTGRES_DB
+                      value: "order_db"
+                    - name: POSTGRES_PASSWORD
+                      value: "postgres"
+                    - name: POSTGRES_USER
+                      value: "postgres"
+                  ports:
+                    - name: order-db-5432
+                      containerPort: 5432
+                  volumeMounts:
+                    - name: var-lib-postgresql-data
+                      mountPath: /var/lib/postgresql/data
+            volumes:
+                - name: var-lib-postgresql-data
+                  persistentVolumeClaim:
+                    claimName: order-db-order-db-data

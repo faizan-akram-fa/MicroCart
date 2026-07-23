@@ -1,0 +1,21 @@
+#! cart-service-service.yaml
+# Generated code, do not edit
+apiVersion: v1
+kind: Service
+metadata:
+    name: cart-service-published
+    namespace: ecommerce-microservices
+    labels:
+        com.docker.compose.project: ecommerce-microservices
+        com.docker.compose.service: cart-service
+spec:
+    selector:
+        com.docker.compose.project: ecommerce-microservices
+        com.docker.compose.service: cart-service
+    ports:
+        - name: cart-servi-3003
+          port: 3003
+          protocol: TCP
+          targetPort: cart-servi-3003
+
+# check if there is at least one published port

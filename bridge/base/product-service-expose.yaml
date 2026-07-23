@@ -1,0 +1,18 @@
+#! product-service-expose.yaml
+# Generated code, do not edit
+apiVersion: v1
+kind: Service
+metadata:
+    name: product-service
+    namespace: ecommerce-microservices
+    labels:
+        com.docker.compose.project: ecommerce-microservices
+        com.docker.compose.service: product-service
+spec:
+    selector:
+        com.docker.compose.project: ecommerce-microservices
+        com.docker.compose.service: product-service
+    ports:
+        - name: product-se-3002
+          port: 3002
+          targetPort: product-se-3002
