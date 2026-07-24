@@ -44,8 +44,8 @@ jobs:
       - name: Install Service Dependencies
         working-directory: ./services/${{ matrix.service }}
         run: |
-          npm ci || npm install
-          chmod -R +x node_modules/.bin || true
+          rm -rf node_modules
+          npm install
 
       - name: Typecheck TypeScript Code
         working-directory: ./services/${{ matrix.service }}
@@ -73,8 +73,8 @@ jobs:
       - name: Install Frontend Dependencies
         working-directory: ./frontend
         run: |
-          npm ci || npm install
-          chmod -R +x node_modules/.bin || true
+          rm -rf node_modules
+          npm install
 
       - name: Typecheck Next.js Frontend
         working-directory: ./frontend
