@@ -49,7 +49,7 @@ jobs:
 
       - name: Typecheck TypeScript Code
         working-directory: ./services/${{ matrix.service }}
-        run: npx --no-install tsc --noEmit || npx tsc --noEmit
+        run: npx tsc --noEmit
 
       - name: Build Microservice
         working-directory: ./services/${{ matrix.service }}
