@@ -87,7 +87,7 @@ export class GatewayController {
       }
 
       return res.status(result.status).json(result.data);
-    } catch (error) {
+    } catch (error: any) {
       const status = error.statusCode || HttpStatus.INTERNAL_SERVER_ERROR;
       return res.status(status).json({
         statusCode: status,
