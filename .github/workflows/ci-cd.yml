@@ -6,9 +6,13 @@ on:
   pull_request:
     branches: [ main, master ]
 
+permissions:
+  contents: read
+  packages: write
+
 env:
   REGISTRY: ghcr.io
-  IMAGE_PREFIX: ${{ github.repository_owner }}/microcart
+  IMAGE_PREFIX: ${{ github.repository }}
 
 jobs:
   # =========================================================================
