@@ -185,6 +185,13 @@ spec:
                   key: POSTGRES_PASSWORD
             - name: DB_DATABASE
               value: "product_db"
+            - name: DB_NAME
+              value: "product_db"
+            - name: JWT_SECRET
+              valueFrom:
+                secretKeyRef:
+                  name: microcart-secrets
+                  key: JWT_SECRET
           resources:
             requests:
               cpu: 100m
@@ -247,6 +254,13 @@ spec:
                   key: POSTGRES_PASSWORD
             - name: DB_DATABASE
               value: "cart_db"
+            - name: DB_NAME
+              value: "cart_db"
+            - name: JWT_SECRET
+              valueFrom:
+                secretKeyRef:
+                  name: microcart-secrets
+                  key: JWT_SECRET
           resources:
             requests:
               cpu: 100m
@@ -309,6 +323,13 @@ spec:
                   key: POSTGRES_PASSWORD
             - name: DB_DATABASE
               value: "order_db"
+            - name: DB_NAME
+              value: "order_db"
+            - name: JWT_SECRET
+              valueFrom:
+                secretKeyRef:
+                  name: microcart-secrets
+                  key: JWT_SECRET
           resources:
             requests:
               cpu: 100m
@@ -371,6 +392,13 @@ spec:
                   key: POSTGRES_PASSWORD
             - name: DB_DATABASE
               value: "wishlist_db"
+            - name: DB_NAME
+              value: "wishlist_db"
+            - name: JWT_SECRET
+              valueFrom:
+                secretKeyRef:
+                  name: microcart-secrets
+                  key: JWT_SECRET
           resources:
             requests:
               cpu: 100m
@@ -433,6 +461,13 @@ spec:
                   key: POSTGRES_PASSWORD
             - name: DB_DATABASE
               value: "support_db"
+            - name: DB_NAME
+              value: "support_db"
+            - name: JWT_SECRET
+              valueFrom:
+                secretKeyRef:
+                  name: microcart-secrets
+                  key: JWT_SECRET
           resources:
             requests:
               cpu: 100m

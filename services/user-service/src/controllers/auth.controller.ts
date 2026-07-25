@@ -67,12 +67,12 @@ export class AuthController {
       const result = await this.authService.googleLogin(req.user);
       console.log(`Redirecting to frontend with role: ${result.user.role}`);
       
-      // Redirect to frontend with token and role
-      return res.redirect(`http://localhost:3000/auth/callback?token=${result.access_token}&role=${result.user.role}`);
+      const frontendUrl = process.env.FRONTEND_URL || 'http://localhost:3000';
+      return res.redirect(`${frontendUrl}/auth/callback?token=${result.access_token}&role=${result.user.role}`);
     } catch (error) {
       console.error('❌ Google Auth Redirect Error:', error.message);
-      // Redirect to login with error
-      return res.redirect(`http://localhost:3000/login?error=${encodeURIComponent(error.message)}`);
+      const frontendUrl = process.env.FRONTEND_URL || 'http://localhost:3000';
+      return res.redirect(`${frontendUrl}/login?error=${encodeURIComponent(error.message)}`);
     }
   }
 

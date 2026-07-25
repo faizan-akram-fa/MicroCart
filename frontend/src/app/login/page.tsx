@@ -122,8 +122,10 @@ function LoginContent() {
   };
 
   const handleGoogleLogin = () => {
-    // Connect via API Gateway on port 4000
-    window.location.href = 'http://localhost:4000/api/auth/google';
+    const apiBase = typeof window !== 'undefined' && window.location.hostname !== 'localhost' && window.location.hostname !== '127.0.0.1'
+      ? `${window.location.protocol}//${window.location.host}/api`
+      : (process.env.NEXT_PUBLIC_API_URL || 'http://localhost:4000/api');
+    window.location.href = `${apiBase.replace(/\/+$/, '')}/auth/google`;
   };
 
   return (
