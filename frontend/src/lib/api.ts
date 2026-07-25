@@ -2,9 +2,20 @@ import axios from 'axios';
 
 // SSR-compatible API URL
 const isServer = typeof window === 'undefined';
-const API_URL = isServer
-  ? (process.env.INTERNAL_API_URL || 'http://api-gateway:4000/api')
-  : (process.env.NEXT_PUBLIC_API_URL || 'http://localhost:4000/api');
+const getApiUrl = () => {
+  if (isServer) {
+    return process.env.INTERNAL_API_URL || 'http://api-gateway:4000/api';
+  }
+  if (process.env.NEXT_PUBLIC_API_URL && !process.env.NEXT_PUBLIC_API_URL.includes('localhost')) {
+    return process.env.NEXT_PUBLIC_API_URL;
+  }
+  if (typeof window !== 'undefined' && window.location.hostname !== 'localhost' && window.location.hostname !== '127.0.0.1') {
+    return `${window.location.protocol}//${window.location.host}/api`;
+  }
+  return process.env.NEXT_PUBLIC_API_URL || 'http://localhost:4000/api';
+};
+
+const API_URL = getApiUrl();
 
 const api = axios.create({
   baseURL: API_URL,
