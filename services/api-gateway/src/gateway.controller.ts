@@ -1,6 +1,7 @@
 import {
   Controller,
   All,
+  Get,
   Req,
   Res,
   HttpException,
@@ -12,6 +13,11 @@ import { ProxyService } from './proxy.service';
 @Controller()
 export class GatewayController {
   constructor(private proxyService: ProxyService) { }
+
+  @Get('health')
+  healthCheck() {
+    return { status: 'ok', service: 'api-gateway' };
+  }
 
   @All('auth*')
   async proxyAuth(@Req() req: Request, @Res() res: Response) {
