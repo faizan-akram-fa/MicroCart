@@ -1,0 +1,17 @@
+# =========================================================================
+# KUBERNETES CERTIFICATE (Explicit Let's Encrypt TLS Certificate for microcart.me)
+# =========================================================================
+
+apiVersion: cert-manager.io/v1
+kind: Certificate
+metadata:
+  name: microcart-certificate
+  namespace: microcart
+spec:
+  secretName: microcart-tls
+  issuerRef:
+    name: letsencrypt-prod
+    kind: ClusterIssuer
+  dnsNames:
+    - microcart.me
+    - www.microcart.me
