@@ -76,15 +76,15 @@ export const authAPI = {
 
 const USER_SERVICE_URL = isServer
   ? (process.env.INTERNAL_USER_SERVICE_URL || 'http://user-service:3001')
-  : (process.env.NEXT_PUBLIC_USER_SERVICE_URL || 'http://localhost:3001');
+  : (process.env.NEXT_PUBLIC_USER_SERVICE_URL || API_URL);
 
 const PRODUCT_SERVICE_URL = isServer
   ? (process.env.INTERNAL_PRODUCT_SERVICE_URL || 'http://product-service:3002')
-  : (process.env.NEXT_PUBLIC_PRODUCT_SERVICE_URL || 'http://localhost:3002');
+  : (process.env.NEXT_PUBLIC_PRODUCT_SERVICE_URL || API_URL);
 
 const SUPPORT_SERVICE_URL = isServer
   ? (process.env.INTERNAL_SUPPORT_SERVICE_URL || 'http://support-service:3006')
-  : (process.env.NEXT_PUBLIC_SUPPORT_SERVICE_URL || 'http://localhost:3006');
+  : (process.env.NEXT_PUBLIC_SUPPORT_SERVICE_URL || API_URL);
 
 // Products API
 export const productsAPI = {

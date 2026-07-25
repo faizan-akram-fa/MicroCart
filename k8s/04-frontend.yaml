@@ -25,7 +25,7 @@ spec:
             - containerPort: 3000
           env:
             - name: NEXT_PUBLIC_API_URL
-              value: "http://api-gateway:4000"
+              value: "/api"
           resources:
             requests:
               cpu: 100m
