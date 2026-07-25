@@ -1,0 +1,404 @@
+# =========================================================================
+# KUBERNETES DATABASES (PostgreSQL Stateful Persistent Layer)
+# =========================================================================
+
+# --- 1. USER DATABASE ---
+apiVersion: v1
+kind: PersistentVolumeClaim
+metadata:
+  name: user-db-pvc
+  namespace: microcart
+spec:
+  accessModes:
+    - ReadWriteOnce
+  resources:
+    requests:
+      storage: 5Gi
+---
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: user-db
+  namespace: microcart
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: user-db
+  template:
+    metadata:
+      labels:
+        app: user-db
+    spec:
+      containers:
+        - name: postgres
+          image: postgres:15-alpine
+          ports:
+            - containerPort: 5432
+          env:
+            - name: POSTGRES_USER
+              valueFrom:
+                secretKeyRef:
+                  name: microcart-secrets
+                  key: POSTGRES_USER
+            - name: POSTGRES_PASSWORD
+              valueFrom:
+                secretKeyRef:
+                  name: microcart-secrets
+                  key: POSTGRES_PASSWORD
+            - name: POSTGRES_DB
+              value: "user_db"
+          volumeMounts:
+            - name: storage
+              mountPath: /var/lib/postgresql/data
+      volumes:
+        - name: storage
+          persistentVolumeClaim:
+            claimName: user-db-pvc
+---
+apiVersion: v1
+kind: Service
+metadata:
+  name: user-db
+  namespace: microcart
+spec:
+  ports:
+    - port: 5432
+      targetPort: 5432
+  selector:
+    app: user-db
+
+---
+# --- 2. PRODUCT DATABASE ---
+apiVersion: v1
+kind: PersistentVolumeClaim
+metadata:
+  name: product-db-pvc
+  namespace: microcart
+spec:
+  accessModes:
+    - ReadWriteOnce
+  resources:
+    requests:
+      storage: 5Gi
+---
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: product-db
+  namespace: microcart
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: product-db
+  template:
+    metadata:
+      labels:
+        app: product-db
+    spec:
+      containers:
+        - name: postgres
+          image: postgres:15-alpine
+          ports:
+            - containerPort: 5432
+          env:
+            - name: POSTGRES_USER
+              valueFrom:
+                secretKeyRef:
+                  name: microcart-secrets
+                  key: POSTGRES_USER
+            - name: POSTGRES_PASSWORD
+              valueFrom:
+                secretKeyRef:
+                  name: microcart-secrets
+                  key: POSTGRES_PASSWORD
+            - name: POSTGRES_DB
+              value: "product_db"
+          volumeMounts:
+            - name: storage
+              mountPath: /var/lib/postgresql/data
+      volumes:
+        - name: storage
+          persistentVolumeClaim:
+            claimName: product-db-pvc
+---
+apiVersion: v1
+kind: Service
+metadata:
+  name: product-db
+  namespace: microcart
+spec:
+  ports:
+    - port: 5432
+      targetPort: 5432
+  selector:
+    app: product-db
+
+---
+# --- 3. CART DATABASE ---
+apiVersion: v1
+kind: PersistentVolumeClaim
+metadata:
+  name: cart-db-pvc
+  namespace: microcart
+spec:
+  accessModes:
+    - ReadWriteOnce
+  resources:
+    requests:
+      storage: 5Gi
+---
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: cart-db
+  namespace: microcart
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: cart-db
+  template:
+    metadata:
+      labels:
+        app: cart-db
+    spec:
+      containers:
+        - name: postgres
+          image: postgres:15-alpine
+          ports:
+            - containerPort: 5432
+          env:
+            - name: POSTGRES_USER
+              valueFrom:
+                secretKeyRef:
+                  name: microcart-secrets
+                  key: POSTGRES_USER
+            - name: POSTGRES_PASSWORD
+              valueFrom:
+                secretKeyRef:
+                  name: microcart-secrets
+                  key: POSTGRES_PASSWORD
+            - name: POSTGRES_DB
+              value: "cart_db"
+          volumeMounts:
+            - name: storage
+              mountPath: /var/lib/postgresql/data
+      volumes:
+        - name: storage
+          persistentVolumeClaim:
+            claimName: cart-db-pvc
+---
+apiVersion: v1
+kind: Service
+metadata:
+  name: cart-db
+  namespace: microcart
+spec:
+  ports:
+    - port: 5432
+      targetPort: 5432
+  selector:
+    app: cart-db
+
+---
+# --- 4. ORDER DATABASE ---
+apiVersion: v1
+kind: PersistentVolumeClaim
+metadata:
+  name: order-db-pvc
+  namespace: microcart
+spec:
+  accessModes:
+    - ReadWriteOnce
+  resources:
+    requests:
+      storage: 5Gi
+---
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: order-db
+  namespace: microcart
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: order-db
+  template:
+    metadata:
+      labels:
+        app: order-db
+    spec:
+      containers:
+        - name: postgres
+          image: postgres:15-alpine
+          ports:
+            - containerPort: 5432
+          env:
+            - name: POSTGRES_USER
+              valueFrom:
+                secretKeyRef:
+                  name: microcart-secrets
+                  key: POSTGRES_USER
+            - name: POSTGRES_PASSWORD
+              valueFrom:
+                secretKeyRef:
+                  name: microcart-secrets
+                  key: POSTGRES_PASSWORD
+            - name: POSTGRES_DB
+              value: "order_db"
+          volumeMounts:
+            - name: storage
+              mountPath: /var/lib/postgresql/data
+      volumes:
+        - name: storage
+          persistentVolumeClaim:
+            claimName: order-db-pvc
+---
+apiVersion: v1
+kind: Service
+metadata:
+  name: order-db
+  namespace: microcart
+spec:
+  ports:
+    - port: 5432
+      targetPort: 5432
+  selector:
+    app: order-db
+
+---
+# --- 5. WISHLIST DATABASE ---
+apiVersion: v1
+kind: PersistentVolumeClaim
+metadata:
+  name: wishlist-db-pvc
+  namespace: microcart
+spec:
+  accessModes:
+    - ReadWriteOnce
+  resources:
+    requests:
+      storage: 5Gi
+---
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: wishlist-db
+  namespace: microcart
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: wishlist-db
+  template:
+    metadata:
+      labels:
+        app: wishlist-db
+    spec:
+      containers:
+        - name: postgres
+          image: postgres:15-alpine
+          ports:
+            - containerPort: 5432
+          env:
+            - name: POSTGRES_USER
+              valueFrom:
+                secretKeyRef:
+                  name: microcart-secrets
+                  key: POSTGRES_USER
+            - name: POSTGRES_PASSWORD
+              valueFrom:
+                secretKeyRef:
+                  name: microcart-secrets
+                  key: POSTGRES_PASSWORD
+            - name: POSTGRES_DB
+              value: "wishlist_db"
+          volumeMounts:
+            - name: storage
+              mountPath: /var/lib/postgresql/data
+      volumes:
+        - name: storage
+          persistentVolumeClaim:
+            claimName: wishlist-db-pvc
+---
+apiVersion: v1
+kind: Service
+metadata:
+  name: wishlist-db
+  namespace: microcart
+spec:
+  ports:
+    - port: 5432
+      targetPort: 5432
+  selector:
+    app: wishlist-db
+
+---
+# --- 6. SUPPORT DATABASE ---
+apiVersion: v1
+kind: PersistentVolumeClaim
+metadata:
+  name: support-db-pvc
+  namespace: microcart
+spec:
+  accessModes:
+    - ReadWriteOnce
+  resources:
+    requests:
+      storage: 5Gi
+---
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: support-db
+  namespace: microcart
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: support-db
+  template:
+    metadata:
+      labels:
+        app: support-db
+    spec:
+      containers:
+        - name: postgres
+          image: postgres:15-alpine
+          ports:
+            - containerPort: 5432
+          env:
+            - name: POSTGRES_USER
+              valueFrom:
+                secretKeyRef:
+                  name: microcart-secrets
+                  key: POSTGRES_USER
+            - name: POSTGRES_PASSWORD
+              valueFrom:
+                secretKeyRef:
+                  name: microcart-secrets
+                  key: POSTGRES_PASSWORD
+            - name: POSTGRES_DB
+              value: "support_db"
+          volumeMounts:
+            - name: storage
+              mountPath: /var/lib/postgresql/data
+      volumes:
+        - name: storage
+          persistentVolumeClaim:
+            claimName: support-db-pvc
+---
+apiVersion: v1
+kind: Service
+metadata:
+  name: support-db
+  namespace: microcart
+spec:
+  ports:
+    - port: 5432
+      targetPort: 5432
+  selector:
+    app: support-db

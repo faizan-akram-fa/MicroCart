@@ -1,0 +1,7 @@
+apiVersion: v1
+kind: Namespace
+metadata:
+  name: microcart
+  labels:
+    app.kubernetes.io/name: microcart
+    app.kubernetes.io/part-of: ecommerce-microservices
