@@ -43,6 +43,7 @@ api.interceptors.response.use(
       if (
         typeof window !== 'undefined' &&
         !window.location.pathname.startsWith('/login') &&
+        !window.location.pathname.startsWith('/auth/callback') &&
         !window.location.pathname.startsWith('/forgot-password') &&
         error.response?.data?.message !== 'Account deleted or blocked. Contact support'
       ) {
