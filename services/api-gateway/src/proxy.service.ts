@@ -109,8 +109,21 @@ export class ProxyService {
       const resContentType = (response.headers['content-type'] || response.headers['Content-Type'] || '').toLowerCase();
       let resData = response.data;
 
-      // Parse JSON if received as arraybuffer for non-binary content
-      if (Buffer.isBuffer(resData) && !resContentType.includes('image') && !resContentType.includes('pdf') && !path.startsWith('uploads')) {
+      const isBinaryResponse = isBinaryRequest || resContentType.includes('image') || resContentType.includes('pdf') || resContentType.includes('octet-stream');
+
+      if (isBinaryResponse) {
+        if (!Buffer.isBuffer(resData)) {
+          if (resData instanceof ArrayBuffer || ArrayBuffer.isView(resData)) {
+            resData = Buffer.from(resData as any);
+          } else if (typeof resData === 'string') {
+            resData = Buffer.from(resData, 'binary');
+          } else if (resData && typeof resData === 'object' && (resData as any).type === 'Buffer' && Array.isArray((resData as any).data)) {
+            resData = Buffer.from((resData as any).data);
+          } else {
+            resData = Buffer.from(String(resData), 'binary');
+          }
+        }
+      } else if (Buffer.isBuffer(resData)) {
         try {
           resData = JSON.parse(resData.toString('utf-8'));
         } catch (e) {

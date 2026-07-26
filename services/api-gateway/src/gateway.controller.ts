@@ -119,7 +119,9 @@ export class GatewayController {
           ? result.data
           : (result.data instanceof ArrayBuffer || ArrayBuffer.isView(result.data))
             ? Buffer.from(result.data as any)
-            : Buffer.from(String(result.data));
+            : typeof result.data === 'string'
+              ? Buffer.from(result.data, 'binary')
+              : Buffer.from(String(result.data), 'binary');
 
         return res.status(result.status).send(buffer);
       }
