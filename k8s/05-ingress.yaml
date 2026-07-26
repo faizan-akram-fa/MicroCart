@@ -21,6 +21,14 @@ spec:
     - host: microcart.me
       http:
         paths:
+          - path: /grafana
+            pathType: Prefix
+            backend:
+              service:
+                name: grafana
+                port:
+                  number: 3010
+
           - path: /api
             pathType: Prefix
             backend:
@@ -40,6 +48,14 @@ spec:
     - host: www.microcart.me
       http:
         paths:
+          - path: /grafana
+            pathType: Prefix
+            backend:
+              service:
+                name: grafana
+                port:
+                  number: 3010
+
           - path: /api
             pathType: Prefix
             backend:

@@ -1,0 +1,179 @@
+# =========================================================================
+# KUBERNETES MONITORING LAYER (Prometheus + Grafana + Loki + Promtail)
+# =========================================================================
+
+# --- 1. PROMETHEUS CONFIGMAP & DEPLOYMENT ---
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: prometheus-config
+  namespace: microcart
+data:
+  prometheus.yml: |
+    global:
+      scrape_interval: 5s
+      evaluation_interval: 5s
+
+    scrape_configs:
+      - job_name: 'api-gateway'
+        metrics_path: '/metrics'
+        static_configs:
+          - targets: ['api-gateway:4000']
+
+      - job_name: 'user-service'
+        metrics_path: '/metrics'
+        static_configs:
+          - targets: ['user-service:3001']
+
+      - job_name: 'product-service'
+        metrics_path: '/metrics'
+        static_configs:
+          - targets: ['product-service:3002']
+
+      - job_name: 'cart-service'
+        metrics_path: '/metrics'
+        static_configs:
+          - targets: ['cart-service:3003']
+
+      - job_name: 'order-service'
+        metrics_path: '/metrics'
+        static_configs:
+          - targets: ['order-service:3004']
+
+      - job_name: 'wishlist-service'
+        metrics_path: '/metrics'
+        static_configs:
+          - targets: ['wishlist-service:3005']
+
+      - job_name: 'support-service'
+        metrics_path: '/metrics'
+        static_configs:
+          - targets: ['support-service:3006']
+---
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: prometheus
+  namespace: microcart
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: prometheus
+  template:
+    metadata:
+      labels:
+        app: prometheus
+    spec:
+      containers:
+        - name: prometheus
+          image: prom/prometheus:v2.50.1
+          ports:
+            - containerPort: 9090
+          volumeMounts:
+            - name: config-volume
+              mountPath: /etc/prometheus/prometheus.yml
+              subPath: prometheus.yml
+      volumes:
+        - name: config-volume
+          configMap:
+            name: prometheus-config
+---
+apiVersion: v1
+kind: Service
+metadata:
+  name: prometheus
+  namespace: microcart
+spec:
+  ports:
+    - port: 9090
+      targetPort: 9090
+  selector:
+    app: prometheus
+---
+
+# --- 2. LOKI DEPLOYMENT & SERVICE ---
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: loki
+  namespace: microcart
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: loki
+  template:
+    metadata:
+      labels:
+        app: loki
+    spec:
+      containers:
+        - name: loki
+          image: grafana/loki:2.9.5
+          ports:
+            - containerPort: 3100
+---
+apiVersion: v1
+kind: Service
+metadata:
+  name: loki
+  namespace: microcart
+spec:
+  ports:
+    - port: 3100
+      targetPort: 3100
+  selector:
+    app: loki
+---
+
+# --- 3. GRAFANA DEPLOYMENT & SERVICE ---
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: grafana
+  namespace: microcart
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: grafana
+  template:
+    metadata:
+      labels:
+        app: grafana
+    spec:
+      containers:
+        - name: grafana
+          image: grafana/grafana:10.3.3
+          ports:
+            - containerPort: 3010
+          env:
+            - name: GF_SERVER_HTTP_PORT
+              value: "3010"
+            - name: GF_SERVER_ROOT_URL
+              value: "%(protocol)s://%(domain)s/grafana/"
+            - name: GF_SERVER_SERVE_FROM_SUB_PATH
+              value: "true"
+            - name: GF_SECURITY_ADMIN_USER
+              value: "admin"
+            - name: GF_SECURITY_ADMIN_PASSWORD
+              value: "admin123"
+            - name: GF_USERS_ALLOW_SIGN_UP
+              value: "false"
+            - name: GF_AUTH_ANONYMOUS_ENABLED
+              value: "true"
+            - name: GF_AUTH_ANONYMOUS_ORG_ROLE
+              value: "Viewer"
+---
+apiVersion: v1
+kind: Service
+metadata:
+  name: grafana
+  namespace: microcart
+spec:
+  ports:
+    - port: 3010
+      targetPort: 3010
+  selector:
+    app: grafana

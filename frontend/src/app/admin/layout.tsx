@@ -240,10 +240,15 @@ export default function AdminLayout({ children }: { children: React.ReactNode })
             .map((item) => {
               const isActive = pathname === item.href;
               if ((item as any).isExternal) {
+                const targetHref = item.name.includes('Live Monitoring')
+                  ? (typeof window !== 'undefined' && !window.location.hostname.includes('localhost') && window.location.hostname !== '127.0.0.1'
+                      ? `${window.location.protocol}//${window.location.hostname}/grafana/d/microcart-monitoring`
+                      : 'http://localhost:3010/d/microcart-monitoring')
+                  : item.href;
                 return (
                   <a
                     key={item.href}
-                    href={item.href}
+                    href={targetHref}
                     target="_blank"
                     rel="noopener noreferrer"
                     className="flex items-center p-3 rounded-xl transition-all duration-200 group text-amber-600 dark:text-amber-400 hover:bg-amber-50 dark:hover:bg-amber-950/30 font-bold"
