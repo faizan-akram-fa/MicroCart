@@ -52,8 +52,10 @@ export class ProductController {
     console.log('Create Product Body:', body);
     console.log('User:', req.user);
     if (files && files.length > 0) {
-      const serverUrl = process.env.API_URL || 'http://localhost:3002';
-      const imageUrls = files.map(file => `${serverUrl}/uploads/${file.filename}`);
+      const frontendUrl = (process.env.FRONTEND_URL && !process.env.FRONTEND_URL.includes('localhost'))
+        ? process.env.FRONTEND_URL.replace(/\/+$/, '')
+        : 'https://microcart.me';
+      const imageUrls = files.map(file => `${frontendUrl}/api/uploads/${file.filename}`);
       body.images = imageUrls;
     }
 

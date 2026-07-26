@@ -87,9 +87,15 @@ export default function SellerApprovals() {
 
   const getCnicUrl = (cnicImage: string) => {
     if (!cnicImage) return null;
-    if (cnicImage.startsWith('http')) return cnicImage;
-    // The user service runs on port 3001 and serves uploads
-    return `http://localhost:3001/${cnicImage.replace(/\\/g, '/')}`;
+    let url = cnicImage.replace(/\\/g, '/');
+    if (url.includes('localhost:3001') || url.includes('localhost:3002') || url.includes('localhost:3006')) {
+      url = url.replace(/^https?:\/\/localhost:\d+/, '');
+    }
+    if (url.startsWith('http://') || url.startsWith('https://')) {
+      return url;
+    }
+    const cleanPath = url.startsWith('/') ? url : `/${url}`;
+    return `/api${cleanPath}`;
   };
 
   if (loading && pendingSellers.length === 0) {

@@ -41,7 +41,10 @@ export class UserController {
     if (!file) {
       throw new BadRequestException('File is not an image');
     }
-    const imageUrl = `http://localhost:3001/uploads/${file.filename}`;
+    const frontendUrl = (process.env.FRONTEND_URL && !process.env.FRONTEND_URL.includes('localhost'))
+      ? process.env.FRONTEND_URL.replace(/\/+$/, '')
+      : 'https://microcart.me';
+    const imageUrl = `${frontendUrl}/api/uploads/${file.filename}`;
     return this.userService.updateProfileImage(req.user.userId, imageUrl);
   }
 
@@ -66,7 +69,10 @@ export class UserController {
     if (!file) {
       throw new BadRequestException('File is not an image');
     }
-    const imageUrl = `http://localhost:3001/uploads/${file.filename}`;
+    const frontendUrl = (process.env.FRONTEND_URL && !process.env.FRONTEND_URL.includes('localhost'))
+      ? process.env.FRONTEND_URL.replace(/\/+$/, '')
+      : 'https://microcart.me';
+    const imageUrl = `${frontendUrl}/api/uploads/${file.filename}`;
     return this.userService.updateCnicImage(req.user.userId, imageUrl);
   }
 

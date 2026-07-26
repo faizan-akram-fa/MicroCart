@@ -30,7 +30,10 @@ export class TicketController {
     if (!file) {
       throw new BadRequestException('No file uploaded');
     }
-    const fileUrl = `http://localhost:3006/uploads/${file.filename}`;
+    const frontendUrl = (process.env.FRONTEND_URL && !process.env.FRONTEND_URL.includes('localhost'))
+      ? process.env.FRONTEND_URL.replace(/\/+$/, '')
+      : 'https://microcart.me';
+    const fileUrl = `${frontendUrl}/api/uploads/${file.filename}`;
     return { url: fileUrl };
   }
 
