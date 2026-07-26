@@ -1,10 +1,11 @@
-import { Controller, Get, Put, Delete, Body, UseGuards, Req, Param, Post, UseInterceptors, UploadedFile, BadRequestException, Headers } from '@nestjs/common';
+import { Controller, Get, Put, Delete, Body, UseGuards, Req, Param, Post, UseInterceptors, UploadedFile, UploadedFiles, BadRequestException, Headers } from '@nestjs/common';
 import { UserService } from '../services/user.service';
 import { UpdateProfileDto, ChangePasswordDto } from '../dto/user.dto';
 import { JwtAuthGuard } from '../guards/jwt-auth.guard';
-import { FileInterceptor } from '@nestjs/platform-express';
+import { FileInterceptor, AnyFilesInterceptor } from '@nestjs/platform-express';
 import { diskStorage } from 'multer';
 import { extname } from 'path';
+import * as fs from 'fs';
 import { ConfigService } from '@nestjs/config';
 
 @Controller('users')
@@ -50,9 +51,15 @@ export class UserController {
 
   @Post('profile/cnic')
   @UseGuards(JwtAuthGuard)
-  @UseInterceptors(FileInterceptor('image', {
+  @UseInterceptors(AnyFilesInterceptor({
     storage: diskStorage({
-      destination: './uploads',
+      destination: (req, file, cb) => {
+        const uploadDir = './uploads';
+        if (!fs.existsSync(uploadDir)) {
+          fs.mkdirSync(uploadDir, { recursive: true });
+        }
+        cb(null, uploadDir);
+      },
       filename: (req, file, cb) => {
         const randomName = Array(32).fill(null).map(() => (Math.round(Math.random() * 16)).toString(16)).join('');
         return cb(null, `cnic_${randomName}${extname(file.originalname)}`);
@@ -72,7 +79,8 @@ export class UserController {
       }
     },
   }))
-  async uploadCnicImage(@Req() req, @UploadedFile() file) {
+  async uploadCnicImage(@Req() req, @UploadedFiles() files: Array<Express.Multer.File>, @UploadedFile() singleFile: Express.Multer.File) {
+    const file = singleFile || (files && files.length > 0 ? files[0] : null);
     if (!file) {
       throw new BadRequestException('CNIC Document upload failed. Please upload a valid JPG, PNG, or PDF file.');
     }
