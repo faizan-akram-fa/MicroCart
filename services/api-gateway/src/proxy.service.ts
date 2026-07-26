@@ -106,6 +106,7 @@ export class ProxyService {
         url,
         headers: cleanHeaders,
         responseType: isBinaryRequest ? 'arraybuffer' : 'json',
+        transformResponse: isBinaryRequest ? [(data: any) => data] : undefined,
         maxRedirects: 0, // Don't follow redirects, let the gateway handle them
         validateStatus: (status: number) => status >= 200 && status < 500, // Include 2xx, 3xx, and 4xx responses
       };
