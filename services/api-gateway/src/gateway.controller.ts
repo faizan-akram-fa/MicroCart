@@ -85,6 +85,7 @@ export class GatewayController {
         req.method,
         req.body,
         req.headers,
+        req,
       );
 
       // Handle redirects (e.g., for Google OAuth)

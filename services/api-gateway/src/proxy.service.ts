@@ -21,6 +21,7 @@ export class ProxyService {
     method: string,
     body?: any,
     headers?: any,
+    reqStream?: any,
   ): Promise<{ status: number; headers: any; data: any }> {
     const serviceUrl = this.services[service];
     const url = `${serviceUrl}/${path}`;
@@ -30,9 +31,12 @@ export class ProxyService {
       const cleanHeaders: any = {};
       if (headers?.authorization) cleanHeaders.authorization = headers.authorization;
       if (headers?.Authorization) cleanHeaders.authorization = headers.Authorization;
-      cleanHeaders['content-type'] = headers?.['content-type'] || headers?.['Content-Type'] || 'application/json';
+      if (headers?.['content-type']) cleanHeaders['content-type'] = headers['content-type'];
+      if (headers?.['Content-Type']) cleanHeaders['content-type'] = headers['Content-Type'];
       if (headers?.['x-forwarded-host'] || headers?.host) cleanHeaders['x-forwarded-host'] = headers['x-forwarded-host'] || headers.host;
       if (headers?.['x-forwarded-proto']) cleanHeaders['x-forwarded-proto'] = headers['x-forwarded-proto'];
+
+      const isMultipart = cleanHeaders['content-type']?.toLowerCase().includes('multipart/form-data');
 
       const config: any = {
         method,
@@ -42,8 +46,12 @@ export class ProxyService {
         validateStatus: (status: number) => status >= 200 && status < 500, // Include 2xx, 3xx, and 4xx responses
       };
 
-      if (body && (method === 'POST' || method === 'PUT' || method === 'PATCH')) {
-        config.data = body;
+      if (method === 'POST' || method === 'PUT' || method === 'PATCH') {
+        if (isMultipart && reqStream) {
+          config.data = reqStream;
+        } else {
+          config.data = body;
+        }
       }
 
       console.log(`[ProxyService] Forwarding ${method} ${url} with body:`, JSON.stringify(body));
