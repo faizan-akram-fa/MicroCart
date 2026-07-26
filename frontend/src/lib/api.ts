@@ -98,8 +98,8 @@ export const productsAPI = {
     headers: { 'Content-Type': 'multipart/form-data' },
   }),
   delete: (id: string) => api.delete(`/products/${id}`),
-  bulkCreate: (products: any[]) => api.post(`${PRODUCT_SERVICE_URL}/products/bulk`, products),
-  uploadBulkImages: (data: FormData) => api.post(`${PRODUCT_SERVICE_URL}/products/bulk/images`, data, {
+  bulkCreate: (products: any[]) => api.post('/products/bulk', products),
+  uploadBulkImages: (data: FormData) => api.post('/products/bulk/images', data, {
     headers: { 'Content-Type': 'multipart/form-data' },
   }),
   updateStock: (id: string, quantity: number, isSet: boolean = true) => api.put(`/products/${id}/stock`, { quantity, isSet }),
@@ -108,10 +108,10 @@ export const productsAPI = {
 
 // Reviews API
 export const reviewsAPI = {
-  create: (data: FormData) => api.post(`${PRODUCT_SERVICE_URL}/reviews`, data, {
+  create: (data: FormData) => api.post('/reviews', data, {
     headers: { 'Content-Type': 'multipart/form-data' },
   }),
-  createGuest: (data: FormData) => api.post(`${PRODUCT_SERVICE_URL}/reviews/guest`, data, {
+  createGuest: (data: FormData) => api.post('/reviews/guest', data, {
     headers: { 'Content-Type': 'multipart/form-data' },
   }),
   getByProduct: (productId: string) => api.get(`/reviews/product/${productId}`),
