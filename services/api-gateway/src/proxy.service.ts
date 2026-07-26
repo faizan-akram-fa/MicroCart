@@ -89,10 +89,13 @@ export class ProxyService {
         };
       }
 
+      const isBinaryRequest = path.startsWith('uploads') || cleanHeaders['accept']?.includes('image') || cleanHeaders['accept']?.includes('pdf');
+
       const config: any = {
         method,
         url,
         headers: cleanHeaders,
+        responseType: isBinaryRequest ? 'arraybuffer' : 'json',
         maxRedirects: 0, // Don't follow redirects, let the gateway handle them
         validateStatus: (status: number) => status >= 200 && status < 500, // Include 2xx, 3xx, and 4xx responses
       };
@@ -101,13 +104,24 @@ export class ProxyService {
         config.data = body;
       }
 
-      console.log(`[ProxyService] Forwarding ${method} ${url} with body:`, JSON.stringify(body));
+      console.log(`[ProxyService] Forwarding ${method} ${url}`);
       const response = await firstValueFrom(this.httpService.request(config));
-      console.log(`[ProxyService] Response ${response.status} from ${url}:`, JSON.stringify(response.data));
+      const resContentType = (response.headers['content-type'] || response.headers['Content-Type'] || '').toLowerCase();
+      let resData = response.data;
+
+      // Parse JSON if received as arraybuffer for non-binary content
+      if (Buffer.isBuffer(resData) && !resContentType.includes('image') && !resContentType.includes('pdf') && !path.startsWith('uploads')) {
+        try {
+          resData = JSON.parse(resData.toString('utf-8'));
+        } catch (e) {
+          resData = resData.toString('utf-8');
+        }
+      }
+
       return {
         status: response.status,
         headers: response.headers,
-        data: response.data,
+        data: resData,
       };
     } catch (error: any) {
       console.error('[ProxyService] Axios error:', error.message);

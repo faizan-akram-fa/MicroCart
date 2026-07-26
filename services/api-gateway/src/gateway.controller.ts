@@ -98,6 +98,16 @@ export class GatewayController {
         return res.redirect(result.status, result.headers.location);
       }
 
+      const contentType = (result.headers['content-type'] || result.headers['Content-Type'] || '').toLowerCase();
+      if (contentType) {
+        res.setHeader('Content-Type', contentType);
+      }
+
+      // Serve raw binary buffers (images, pdfs, uploads) directly with res.send
+      if (contentType.includes('image') || contentType.includes('pdf') || contentType.includes('octet-stream') || path.startsWith('uploads') || Buffer.isBuffer(result.data)) {
+        return res.status(result.status).send(result.data);
+      }
+
       return res.status(result.status).json(result.data);
     } catch (error: any) {
       const status = error.statusCode || HttpStatus.INTERNAL_SERVER_ERROR;
