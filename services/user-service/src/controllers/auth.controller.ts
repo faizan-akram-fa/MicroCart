@@ -24,24 +24,13 @@ export class AuthController {
       },
       filename: (req, file, cb) => {
         const randomName = Array(32).fill(null).map(() => (Math.round(Math.random() * 16)).toString(16)).join('');
-        cb(null, `cnic_${randomName}${extname(file.originalname)}`);
+        const ext = extname(file.originalname) || '.jpg';
+        cb(null, `cnic_${randomName}${ext}`);
       },
     }),
-    fileFilter: (req, file, cb) => {
-      const isImageOrPdf =
-        !file.mimetype ||
-        file.mimetype === 'application/octet-stream' ||
-        file.mimetype.match(/\/(jpg|jpeg|png|gif|pdf|webp|bmp|svg\+xml)$/i) ||
-        file.originalname.match(/\.(jpg|jpeg|png|gif|pdf|webp|bmp)$/i);
-
-      if (isImageOrPdf) {
-        cb(null, true);
-      } else {
-        cb(new BadRequestException('Only image or PDF files are allowed!'), false);
-      }
-    },
   }))
-  async register(@Body() registerDto: RegisterDto, @UploadedFile() file: Express.Multer.File) {
+  async register(@Req() req, @Body() registerDto: RegisterDto, @UploadedFile() singleFile: Express.Multer.File) {
+    const file = singleFile || req.file || (req.files && req.files.length > 0 ? req.files[0] : null);
     console.log('[AuthController] Register request role:', registerDto.role, 'File received:', file ? file.filename : 'NO FILE');
     if (registerDto.role === 'seller' && !file && !registerDto.cnicImage) {
       throw new BadRequestException('CNIC Image/PDF is required for sellers');

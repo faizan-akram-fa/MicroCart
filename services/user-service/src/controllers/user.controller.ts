@@ -62,25 +62,14 @@ export class UserController {
       },
       filename: (req, file, cb) => {
         const randomName = Array(32).fill(null).map(() => (Math.round(Math.random() * 16)).toString(16)).join('');
-        return cb(null, `cnic_${randomName}${extname(file.originalname)}`);
+        const ext = extname(file.originalname) || '.jpg';
+        return cb(null, `cnic_${randomName}${ext}`);
       },
     }),
-    fileFilter: (req, file, cb) => {
-      const isImageOrPdf =
-        !file.mimetype ||
-        file.mimetype === 'application/octet-stream' ||
-        file.mimetype.match(/\/(jpg|jpeg|png|gif|pdf|webp|bmp|svg\+xml)$/i) ||
-        file.originalname.match(/\.(jpg|jpeg|png|gif|pdf|webp|bmp)$/i);
-
-      if (isImageOrPdf) {
-        cb(null, true);
-      } else {
-        cb(new BadRequestException('Only image or PDF files are allowed!'), false);
-      }
-    },
   }))
-  async uploadCnicImage(@Req() req, @UploadedFiles() files: Array<Express.Multer.File>, @UploadedFile() singleFile: Express.Multer.File) {
-    const file = singleFile || (files && files.length > 0 ? files[0] : null);
+  async uploadCnicImage(@Req() req) {
+    const file = req.file || (req.files && req.files.length > 0 ? req.files[0] : null);
+    console.log('[UserController] uploadCnicImage hit. Found file:', file ? file.filename : 'NULL', 'req.files length:', req.files?.length);
     if (!file) {
       throw new BadRequestException('CNIC Document upload failed. Please upload a valid JPG, PNG, or PDF file.');
     }
