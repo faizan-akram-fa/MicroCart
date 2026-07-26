@@ -70,10 +70,10 @@ export const authAPI = {
     return api.post('/auth/register', data);
   },
   login: (data: any) => api.post('/auth/login', data),
-  uploadProfileImage: (data: FormData) => api.post(`${USER_SERVICE_URL}/users/profile/image`, data, {
+  uploadProfileImage: (data: FormData) => api.post('/users/profile/image', data, {
     headers: { 'Content-Type': 'multipart/form-data' },
   }),
-  uploadCnicImage: (data: FormData) => api.post(`${USER_SERVICE_URL}/users/profile/cnic`, data, {
+  uploadCnicImage: (data: FormData) => api.post('/users/profile/cnic', data, {
     headers: { 'Content-Type': 'multipart/form-data' },
   }),
   resubmitSeller: () => api.put('/users/profile/resubmit-seller'),
@@ -87,27 +87,14 @@ export const authAPI = {
   setRole: (role: string) => api.post('/auth/role', { role }),
 };
 
-const USER_SERVICE_URL = isServer
-  ? (process.env.INTERNAL_USER_SERVICE_URL || 'http://user-service:3001')
-  : (process.env.NEXT_PUBLIC_USER_SERVICE_URL || API_URL);
-
-const PRODUCT_SERVICE_URL = isServer
-  ? (process.env.INTERNAL_PRODUCT_SERVICE_URL || 'http://product-service:3002')
-  : (process.env.NEXT_PUBLIC_PRODUCT_SERVICE_URL || API_URL);
-
-const SUPPORT_SERVICE_URL = isServer
-  ? (process.env.INTERNAL_SUPPORT_SERVICE_URL || 'http://support-service:3006')
-  : (process.env.NEXT_PUBLIC_SUPPORT_SERVICE_URL || API_URL);
-
 // Products API
 export const productsAPI = {
   getAll: (params?: any) => api.get('/products', { params }),
   getById: (id: string) => api.get(`/products/${id}`),
-  // Bypass Gateway for uploads to avoid buffering delay
-  create: (data: FormData) => api.post(`${PRODUCT_SERVICE_URL}/products`, data, {
+  create: (data: FormData) => api.post('/products', data, {
     headers: { 'Content-Type': 'multipart/form-data' },
   }),
-  update: (id: string, data: any) => api.put(`${PRODUCT_SERVICE_URL}/products/${id}`, data, {
+  update: (id: string, data: any) => api.put(`/products/${id}`, data, {
     headers: { 'Content-Type': 'multipart/form-data' },
   }),
   delete: (id: string) => api.delete(`/products/${id}`),
@@ -222,7 +209,7 @@ export const supportAPI = {
   sendTicketMessage: (ticketId: string, data: { message: string; attachments?: string[] }) =>
     api.post(`/support/tickets/${ticketId}/messages`, data),
   getTicketMessages: (ticketId: string) => api.get(`/support/tickets/${ticketId}/messages`),
-  uploadAttachment: (data: FormData) => api.post(`${SUPPORT_SERVICE_URL}/support/tickets/upload`, data, {
+  uploadAttachment: (data: FormData) => api.post('/support/tickets/upload', data, {
     headers: { 'Content-Type': 'multipart/form-data' },
   }),
   getUnreadCount: () => api.get('/support/tickets/unread/count'),
