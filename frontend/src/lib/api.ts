@@ -24,13 +24,17 @@ const api = axios.create({
   },
 });
 
-// Add token to requests
+// Add token & auto-detect FormData content type
 api.interceptors.request.use((config) => {
   if (typeof window !== 'undefined') {
     const token = localStorage.getItem('token');
     if (token) {
       config.headers.Authorization = `Bearer ${token}`;
     }
+  }
+  if (config.data instanceof FormData && config.headers) {
+    delete config.headers['Content-Type'];
+    delete config.headers['content-type'];
   }
   return config;
 });
