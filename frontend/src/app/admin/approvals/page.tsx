@@ -85,12 +85,14 @@ export default function SellerApprovals() {
     (seller.storeName && seller.storeName.toLowerCase().includes(searchTerm.toLowerCase()))
   );
 
-  const getCnicUrl = (cnicImage: string) => {
+  const getCnicUrl = (cnicImage: any) => {
     if (!cnicImage) return null;
-    let url = cnicImage.replace(/\\/g, '/');
-    if (url.includes('localhost:3001') || url.includes('localhost:3002') || url.includes('localhost:3006')) {
-      url = url.replace(/^https?:\/\/localhost:\d+/, '');
-    }
+    let url = typeof cnicImage === 'string' ? cnicImage.replace(/\\/g, '/') : String(cnicImage);
+    if (url === '[object Object]' || url === '{}' || url.includes('%7B%7D') || url.includes('{}')) return null;
+
+    // Always strip localhost domain & port to route through domain proxy
+    url = url.replace(/^https?:\/\/localhost:\d+/, '');
+
     if (url.startsWith('http://') || url.startsWith('https://')) {
       return url;
     }
