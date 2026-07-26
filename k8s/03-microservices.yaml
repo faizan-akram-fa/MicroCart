@@ -9,7 +9,7 @@ metadata:
   name: api-gateway
   namespace: microcart
 spec:
-  replicas: 2
+  replicas: 1
   selector:
     matchLabels:
       app: api-gateway
@@ -69,7 +69,7 @@ metadata:
   name: user-service
   namespace: microcart
 spec:
-  replicas: 2
+  replicas: 1
   selector:
     matchLabels:
       app: user-service
@@ -151,7 +151,7 @@ metadata:
   name: product-service
   namespace: microcart
 spec:
-  replicas: 2
+  replicas: 1
   selector:
     matchLabels:
       app: product-service
@@ -220,7 +220,7 @@ metadata:
   name: cart-service
   namespace: microcart
 spec:
-  replicas: 2
+  replicas: 1
   selector:
     matchLabels:
       app: cart-service
@@ -289,7 +289,7 @@ metadata:
   name: order-service
   namespace: microcart
 spec:
-  replicas: 2
+  replicas: 1
   selector:
     matchLabels:
       app: order-service
@@ -358,7 +358,7 @@ metadata:
   name: wishlist-service
   namespace: microcart
 spec:
-  replicas: 2
+  replicas: 1
   selector:
     matchLabels:
       app: wishlist-service
@@ -427,7 +427,7 @@ metadata:
   name: support-service
   namespace: microcart
 spec:
-  replicas: 2
+  replicas: 1
   selector:
     matchLabels:
       app: support-service
