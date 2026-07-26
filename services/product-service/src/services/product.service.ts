@@ -1,4 +1,4 @@
-import { Injectable, NotFoundException, ForbiddenException, BadRequestException } from '@nestjs/common';
+import { Injectable, NotFoundException, ForbiddenException, BadRequestException, OnModuleInit } from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
 import { Repository, Like, Between, MoreThanOrEqual, LessThanOrEqual } from 'typeorm';
 import { Product } from '../entities/product.entity';
@@ -9,13 +9,88 @@ import { firstValueFrom } from 'rxjs';
 
 
 @Injectable()
-export class ProductService {
+export class ProductService implements OnModuleInit {
   constructor(
     @InjectRepository(Product)
     private productRepository: Repository<Product>,
     private httpService: HttpService,
     private configService: ConfigService,
   ) { }
+
+  async onModuleInit() {
+    try {
+      const count = await this.productRepository.count();
+      if (count === 0) {
+        console.log('Seeding initial products into database...');
+        const initialProducts = [
+          {
+            name: 'Wireless Noise-Canceling Headphones',
+            description: 'Premium over-ear wireless headphones with active noise cancellation and 30-hour battery life.',
+            price: 199.99,
+            category: 'Electronics',
+            stock: 50,
+            sellerId: 'system-admin',
+            images: ['https://images.unsplash.com/photo-1505740420928-5e560c06d30e?auto=format&fit=crop&w=600&q=80'],
+            isActive: true,
+          },
+          {
+            name: 'Ultra-Smart Fitness Watch',
+            description: 'Waterproof smartwatch with heart rate monitoring, GPS tracking, and HD OLED display.',
+            price: 129.50,
+            category: 'Electronics',
+            stock: 35,
+            sellerId: 'system-admin',
+            images: ['https://images.unsplash.com/photo-1523275335684-37898b6baf30?auto=format&fit=crop&w=600&q=80'],
+            isActive: true,
+          },
+          {
+            name: 'Pro Mechanical Gaming Keyboard',
+            description: 'RGB backlit mechanical keyboard with customizable tactile switches and aluminum body.',
+            price: 89.99,
+            category: 'Electronics',
+            stock: 40,
+            sellerId: 'system-admin',
+            images: ['https://images.unsplash.com/photo-1587829741301-dc798b83add3?auto=format&fit=crop&w=600&q=80'],
+            isActive: true,
+          },
+          {
+            name: 'Ergonomic Office Chair',
+            description: 'Breathable mesh executive desk chair with adjustable lumbar support and 3D armrests.',
+            price: 249.00,
+            category: 'Home & Garden',
+            stock: 15,
+            sellerId: 'system-admin',
+            images: ['https://images.unsplash.com/photo-1580481072645-022f9a6d83d0?auto=format&fit=crop&w=600&q=80'],
+            isActive: true,
+          },
+          {
+            name: 'Classic Cotton Denim Jacket',
+            description: 'Timeless vintage style denim jacket made from 100% organic durable cotton.',
+            price: 69.95,
+            category: 'Clothing',
+            stock: 60,
+            sellerId: 'system-admin',
+            images: ['https://images.unsplash.com/photo-1576995853123-5a10305d93c0?auto=format&fit=crop&w=600&q=80'],
+            isActive: true,
+          },
+          {
+            name: 'Stainless Steel Insulated Water Bottle',
+            description: 'Vacuum insulated 1-liter water bottle that keeps drinks cold for 24 hours or hot for 12 hours.',
+            price: 24.99,
+            category: 'Sports',
+            stock: 100,
+            sellerId: 'system-admin',
+            images: ['https://images.unsplash.com/photo-1602143407151-7111542de6e8?auto=format&fit=crop&w=600&q=80'],
+            isActive: true,
+          },
+        ];
+        await this.productRepository.save(initialProducts);
+        console.log('Successfully seeded initial products!');
+      }
+    } catch (err) {
+      console.error('Product seeding failed:', err.message);
+    }
+  }
 
   async create(createProductDto: CreateProductDto, sellerId: string) {
     const product = this.productRepository.create({
