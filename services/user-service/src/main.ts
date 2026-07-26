@@ -3,6 +3,7 @@ import { ValidationPipe } from '@nestjs/common';
 import { AppModule } from './app.module';
 import { NestExpressApplication } from '@nestjs/platform-express';
 import { join } from 'path';
+import * as fs from 'fs';
 import { Registry, Counter, Histogram, collectDefaultMetrics } from 'prom-client';
 
 async function bootstrap() {
@@ -55,8 +56,12 @@ async function bootstrap() {
     transform: true,
   }));
 
-  app.useStaticAssets(join(__dirname, '..', 'uploads'), {
-    prefix: '/uploads/',
+  const uploadDir = join(process.cwd(), 'uploads');
+  if (!fs.existsSync(uploadDir)) {
+    fs.mkdirSync(uploadDir, { recursive: true });
+  }
+  app.useStaticAssets(uploadDir, {
+    prefix: '/uploads',
   });
 
   const port = process.env.PORT || 3001;

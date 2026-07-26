@@ -1,7 +1,7 @@
 import { Controller, Post, Body, Get, UseGuards, Req, Res, UseInterceptors, UploadedFile, BadRequestException } from '@nestjs/common';
 import { FileInterceptor } from '@nestjs/platform-express';
 import { diskStorage } from 'multer';
-import { extname } from 'path';
+import { extname, join } from 'path';
 import * as fs from 'fs';
 import { AuthService } from '../services/auth.service';
 import { RegisterDto, LoginDto, ResetPasswordDto, ForgotPasswordDto } from '../dto/user.dto';
@@ -16,7 +16,7 @@ export class AuthController {
   @UseInterceptors(FileInterceptor('cnicImage', {
     storage: diskStorage({
       destination: (req, file, cb) => {
-        const uploadDir = './uploads';
+        const uploadDir = join(process.cwd(), 'uploads');
         if (!fs.existsSync(uploadDir)) {
           fs.mkdirSync(uploadDir, { recursive: true });
         }

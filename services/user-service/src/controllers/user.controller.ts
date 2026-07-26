@@ -4,7 +4,7 @@ import { UpdateProfileDto, ChangePasswordDto } from '../dto/user.dto';
 import { JwtAuthGuard } from '../guards/jwt-auth.guard';
 import { FileInterceptor, AnyFilesInterceptor } from '@nestjs/platform-express';
 import { diskStorage } from 'multer';
-import { extname } from 'path';
+import { extname, join } from 'path';
 import * as fs from 'fs';
 import { ConfigService } from '@nestjs/config';
 
@@ -54,7 +54,7 @@ export class UserController {
   @UseInterceptors(AnyFilesInterceptor({
     storage: diskStorage({
       destination: (req, file, cb) => {
-        const uploadDir = './uploads';
+        const uploadDir = join(process.cwd(), 'uploads');
         if (!fs.existsSync(uploadDir)) {
           fs.mkdirSync(uploadDir, { recursive: true });
         }
