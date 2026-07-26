@@ -8,6 +8,7 @@ import {
   HttpStatus,
 } from '@nestjs/common';
 import { Request, Response } from 'express';
+import { extname } from 'path';
 import { ProxyService } from './proxy.service';
 
 @Controller()
@@ -98,14 +99,33 @@ export class GatewayController {
         return res.redirect(result.status, result.headers.location);
       }
 
-      const contentType = (result.headers['content-type'] || result.headers['Content-Type'] || '').toLowerCase();
-      if (contentType) {
+      let contentType = (result.headers['content-type'] || result.headers['Content-Type'] || '').toLowerCase();
+      const isUploadOrBinary = path.startsWith('uploads') || contentType.includes('image') || contentType.includes('pdf') || contentType.includes('octet-stream');
+
+      if (isUploadOrBinary) {
+        if (!contentType || contentType.includes('json')) {
+          const ext = extname(path).toLowerCase();
+          if (ext === '.png') contentType = 'image/png';
+          else if (ext === '.jpg' || ext === '.jpeg') contentType = 'image/jpeg';
+          else if (ext === '.gif') contentType = 'image/gif';
+          else if (ext === '.webp') contentType = 'image/webp';
+          else if (ext === '.pdf') contentType = 'application/pdf';
+          else if (ext === '.svg') contentType = 'image/svg+xml';
+          else contentType = 'image/jpeg';
+        }
+
         res.setHeader('Content-Type', contentType);
+        const buffer = Buffer.isBuffer(result.data)
+          ? result.data
+          : (result.data instanceof ArrayBuffer || ArrayBuffer.isView(result.data))
+            ? Buffer.from(result.data as any)
+            : Buffer.from(String(result.data));
+
+        return res.status(result.status).send(buffer);
       }
 
-      // Serve raw binary buffers (images, pdfs, uploads) directly with res.send
-      if (contentType.includes('image') || contentType.includes('pdf') || contentType.includes('octet-stream') || path.startsWith('uploads') || Buffer.isBuffer(result.data)) {
-        return res.status(result.status).send(result.data);
+      if (contentType) {
+        res.setHeader('Content-Type', contentType);
       }
 
       return res.status(result.status).json(result.data);

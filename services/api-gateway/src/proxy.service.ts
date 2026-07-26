@@ -89,7 +89,7 @@ export class ProxyService {
         };
       }
 
-      const isBinaryRequest = path.startsWith('uploads') || cleanHeaders['accept']?.includes('image') || cleanHeaders['accept']?.includes('pdf');
+      const isBinaryRequest = path.startsWith('uploads') || Boolean(path.match(/\.(png|jpg|jpeg|gif|webp|pdf|svg)$/i)) || cleanHeaders['accept']?.includes('image') || cleanHeaders['accept']?.includes('pdf');
 
       const config: any = {
         method,
