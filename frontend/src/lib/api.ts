@@ -40,16 +40,17 @@ api.interceptors.response.use(
   (response) => response,
   (error) => {
     if (error.response?.status === 401) {
-      if (
-        typeof window !== 'undefined' &&
-        !window.location.pathname.startsWith('/login') &&
-        !window.location.pathname.startsWith('/auth/callback') &&
-        !window.location.pathname.startsWith('/forgot-password') &&
-        error.response?.data?.message !== 'Account deleted or blocked. Contact support'
-      ) {
-        localStorage.removeItem('token');
-        localStorage.removeItem('user');
-        window.location.href = '/login';
+      if (typeof window !== 'undefined') {
+        const path = window.location.pathname;
+        const isPublicRoute = path === '/' || path.startsWith('/login') || path.startsWith('/register') || path.startsWith('/products') || path.startsWith('/auth/callback') || path.startsWith('/forgot-password');
+        const msg = error.response?.data?.message;
+        
+        // Only redirect to login on protected routes when token is explicitly invalid or user not found
+        if (!isPublicRoute && (msg === 'User not found' || msg === 'Invalid token' || msg === 'jwt expired' || msg === 'No token provided' || msg === 'Unauthorized')) {
+          localStorage.removeItem('token');
+          localStorage.removeItem('user');
+          window.location.href = '/login';
+        }
       }
     }
     return Promise.reject(error);

@@ -192,6 +192,8 @@ spec:
                 secretKeyRef:
                   name: microcart-secrets
                   key: JWT_SECRET
+            - name: USER_SERVICE_URL
+              value: "http://user-service:3001"
           resources:
             requests:
               cpu: 100m
@@ -261,6 +263,8 @@ spec:
                 secretKeyRef:
                   name: microcart-secrets
                   key: JWT_SECRET
+            - name: USER_SERVICE_URL
+              value: "http://user-service:3001"
           resources:
             requests:
               cpu: 100m
@@ -330,6 +334,8 @@ spec:
                 secretKeyRef:
                   name: microcart-secrets
                   key: JWT_SECRET
+            - name: USER_SERVICE_URL
+              value: "http://user-service:3001"
           resources:
             requests:
               cpu: 100m
@@ -399,6 +405,8 @@ spec:
                 secretKeyRef:
                   name: microcart-secrets
                   key: JWT_SECRET
+            - name: USER_SERVICE_URL
+              value: "http://user-service:3001"
           resources:
             requests:
               cpu: 100m
@@ -468,6 +476,8 @@ spec:
                 secretKeyRef:
                   name: microcart-secrets
                   key: JWT_SECRET
+            - name: USER_SERVICE_URL
+              value: "http://user-service:3001"
           resources:
             requests:
               cpu: 100m
