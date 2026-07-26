@@ -27,10 +27,16 @@ class CustomHandlebarsAdapter implements TemplateAdapter {
     const templateName = mail.template;
     const ext = extname(templateName) || '.hbs';
     const baseName = basename(templateName, ext);
-    const templatePath = join(templateBaseDir, baseName + ext);
+    let templatePath = join(templateBaseDir, baseName + ext);
 
     if (!this.templates[templateName]) {
       try {
+        if (!existsSync(templatePath)) {
+          templatePath = join(process.cwd(), 'src/modules/email/templates', baseName + ext);
+        }
+        if (!existsSync(templatePath)) {
+          templatePath = join(process.cwd(), 'dist/modules/email/templates', baseName + ext);
+        }
         if (!existsSync(templatePath)) {
           return callback(new Error(`Template file not found: ${templatePath}`));
         }
