@@ -84,6 +84,9 @@ spec:
           imagePullPolicy: Always
           ports:
             - containerPort: 3001
+          envFrom:
+            - configMapRef:
+                name: microcart-config
           env:
             - name: PORT
               value: "3001"
@@ -166,6 +169,9 @@ spec:
           imagePullPolicy: Always
           ports:
             - containerPort: 3002
+          envFrom:
+            - configMapRef:
+                name: microcart-config
           env:
             - name: PORT
               value: "3002"
@@ -237,6 +243,9 @@ spec:
           imagePullPolicy: Always
           ports:
             - containerPort: 3003
+          envFrom:
+            - configMapRef:
+                name: microcart-config
           env:
             - name: PORT
               value: "3003"
@@ -308,6 +317,9 @@ spec:
           imagePullPolicy: Always
           ports:
             - containerPort: 3004
+          envFrom:
+            - configMapRef:
+                name: microcart-config
           env:
             - name: PORT
               value: "3004"
@@ -379,6 +391,9 @@ spec:
           imagePullPolicy: Always
           ports:
             - containerPort: 3005
+          envFrom:
+            - configMapRef:
+                name: microcart-config
           env:
             - name: PORT
               value: "3005"
@@ -450,6 +465,9 @@ spec:
           imagePullPolicy: Always
           ports:
             - containerPort: 3006
+          envFrom:
+            - configMapRef:
+                name: microcart-config
           env:
             - name: PORT
               value: "3006"

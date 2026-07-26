@@ -543,7 +543,7 @@ export class OrderService {
     userId: string,
   ): Promise<{ id: string; url: string }> {
     const stripeSecretKey = this.configService.get<string>('STRIPE_SECRET_KEY');
-    const frontendUrl = this.configService.get<string>('FRONTEND_URL', 'http://localhost:3000');
+    const frontendUrl = this.configService.get<string>('FRONTEND_URL') || 'https://microcart.me';
     const exchangeRate = this.configService.get<number>('STRIPE_CURRENCY_CONVERSION_RATE', 278);
 
     if (!stripeSecretKey) {
