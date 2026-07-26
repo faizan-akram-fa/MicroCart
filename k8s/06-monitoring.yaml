@@ -127,7 +127,60 @@ spec:
     app: loki
 ---
 
-# --- 3. GRAFANA DEPLOYMENT & SERVICE ---
+# --- 3. GRAFANA DATASOURCES & DASHBOARDS CONFIGMAPS ---
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: grafana-datasources
+  namespace: microcart
+data:
+  datasources.yml: |
+    apiVersion: 1
+    datasources:
+      - name: Prometheus
+        type: prometheus
+        access: proxy
+        uid: prometheus-ds
+        url: http://prometheus:9090
+        isDefault: true
+        editable: true
+        jsonData:
+          httpMethod: POST
+          timeInterval: '5s'
+      - name: Loki
+        type: loki
+        access: proxy
+        uid: loki-ds
+        url: http://loki:3100
+        isDefault: false
+        editable: true
+        jsonData:
+          maxLines: 1000
+---
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: grafana-dashboards-provider
+  namespace: microcart
+data:
+  dashboards.yml: |
+    apiVersion: 1
+    providers:
+      - name: 'MicroCart Dashboards'
+        orgId: 1
+        folder: 'MicroCart'
+        folderUid: 'microcart'
+        type: file
+        disableDeletion: false
+        editable: true
+        updateIntervalSeconds: 10
+        allowUiUpdates: true
+        options:
+          path: /etc/grafana/provisioning/dashboards
+          foldersFromFilesStructure: false
+---
+
+# --- 4. GRAFANA DEPLOYMENT & SERVICE ---
 apiVersion: apps/v1
 kind: Deployment
 metadata:
@@ -164,7 +217,21 @@ spec:
             - name: GF_AUTH_ANONYMOUS_ENABLED
               value: "true"
             - name: GF_AUTH_ANONYMOUS_ORG_ROLE
-              value: "Viewer"
+              value: "Admin"
+          volumeMounts:
+            - name: datasources-volume
+              mountPath: /etc/grafana/provisioning/datasources/datasources.yml
+              subPath: datasources.yml
+            - name: dashboards-provider-volume
+              mountPath: /etc/grafana/provisioning/dashboards/dashboards.yml
+              subPath: dashboards.yml
+      volumes:
+        - name: datasources-volume
+          configMap:
+            name: grafana-datasources
+        - name: dashboards-provider-volume
+          configMap:
+            name: grafana-dashboards-provider
 ---
 apiVersion: v1
 kind: Service

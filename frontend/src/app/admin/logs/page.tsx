@@ -66,7 +66,7 @@ export default function SystemLogs() {
         </div>
         <div className="flex flex-wrap items-center gap-3">
           <a 
-            href="/grafana/d/microcart-monitoring"
+            href="/grafana/"
             target="_blank"
             rel="noopener noreferrer"
             className="flex items-center px-5 py-2.5 bg-gradient-to-r from-orange-500 to-amber-500 hover:from-orange-600 hover:to-amber-600 text-white font-bold text-sm rounded-2xl shadow-lg shadow-orange-500/20 transition-all transform hover:-translate-y-0.5 active:translate-y-0 cursor-pointer"
