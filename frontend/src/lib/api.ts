@@ -61,21 +61,10 @@ export default api;
 
 // Auth API
 export const authAPI = {
-  register: (data: any) => {
-    if (data instanceof FormData) {
-      return api.post('/auth/register', data, {
-        headers: { 'Content-Type': 'multipart/form-data' },
-      });
-    }
-    return api.post('/auth/register', data);
-  },
+  register: (data: any) => api.post('/auth/register', data),
   login: (data: any) => api.post('/auth/login', data),
-  uploadProfileImage: (data: FormData) => api.post('/users/profile/image', data, {
-    headers: { 'Content-Type': 'multipart/form-data' },
-  }),
-  uploadCnicImage: (data: FormData) => api.post('/users/profile/cnic', data, {
-    headers: { 'Content-Type': 'multipart/form-data' },
-  }),
+  uploadProfileImage: (data: FormData) => api.post('/users/profile/image', data),
+  uploadCnicImage: (data: FormData) => api.post('/users/profile/cnic', data),
   resubmitSeller: () => api.put('/users/profile/resubmit-seller'),
   getProfile: () => api.get('/users/profile'),
   updateProfile: (data: any) => api.put('/users/profile', data),
@@ -91,29 +80,19 @@ export const authAPI = {
 export const productsAPI = {
   getAll: (params?: any) => api.get('/products', { params }),
   getById: (id: string) => api.get(`/products/${id}`),
-  create: (data: FormData) => api.post('/products', data, {
-    headers: { 'Content-Type': 'multipart/form-data' },
-  }),
-  update: (id: string, data: any) => api.put(`/products/${id}`, data, {
-    headers: { 'Content-Type': 'multipart/form-data' },
-  }),
+  create: (data: FormData) => api.post('/products', data),
+  update: (id: string, data: any) => api.put(`/products/${id}`, data),
   delete: (id: string) => api.delete(`/products/${id}`),
   bulkCreate: (products: any[]) => api.post('/products/bulk', products),
-  uploadBulkImages: (data: FormData) => api.post('/products/bulk/images', data, {
-    headers: { 'Content-Type': 'multipart/form-data' },
-  }),
+  uploadBulkImages: (data: FormData) => api.post('/products/bulk/images', data),
   updateStock: (id: string, quantity: number, isSet: boolean = true) => api.put(`/products/${id}/stock`, { quantity, isSet }),
   getSellerProducts: () => api.get('/products/seller'),
 };
 
 // Reviews API
 export const reviewsAPI = {
-  create: (data: FormData) => api.post('/reviews', data, {
-    headers: { 'Content-Type': 'multipart/form-data' },
-  }),
-  createGuest: (data: FormData) => api.post('/reviews/guest', data, {
-    headers: { 'Content-Type': 'multipart/form-data' },
-  }),
+  create: (data: FormData) => api.post('/reviews', data),
+  createGuest: (data: FormData) => api.post('/reviews/guest', data),
   getByProduct: (productId: string) => api.get(`/reviews/product/${productId}`),
   getAllAdmin: () => api.get('/reviews/admin/all'),
   getSeller: () => api.get('/reviews/seller'),
@@ -209,8 +188,6 @@ export const supportAPI = {
   sendTicketMessage: (ticketId: string, data: { message: string; attachments?: string[] }) =>
     api.post(`/support/tickets/${ticketId}/messages`, data),
   getTicketMessages: (ticketId: string) => api.get(`/support/tickets/${ticketId}/messages`),
-  uploadAttachment: (data: FormData) => api.post('/support/tickets/upload', data, {
-    headers: { 'Content-Type': 'multipart/form-data' },
-  }),
+  uploadAttachment: (data: FormData) => api.post('/support/tickets/upload', data),
   getUnreadCount: () => api.get('/support/tickets/unread/count'),
 };
