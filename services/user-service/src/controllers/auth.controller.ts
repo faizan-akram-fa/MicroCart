@@ -2,6 +2,7 @@ import { Controller, Post, Body, Get, UseGuards, Req, Res, UseInterceptors, Uplo
 import { FileInterceptor } from '@nestjs/platform-express';
 import { diskStorage } from 'multer';
 import { extname } from 'path';
+import * as fs from 'fs';
 import { AuthService } from '../services/auth.service';
 import { RegisterDto, LoginDto, ResetPasswordDto, ForgotPasswordDto } from '../dto/user.dto';
 import { JwtAuthGuard } from '../guards/jwt-auth.guard';
@@ -14,14 +15,20 @@ export class AuthController {
   @Post('register')
   @UseInterceptors(FileInterceptor('cnicImage', {
     storage: diskStorage({
-      destination: './uploads/cnic',
+      destination: (req, file, cb) => {
+        const uploadDir = './uploads';
+        if (!fs.existsSync(uploadDir)) {
+          fs.mkdirSync(uploadDir, { recursive: true });
+        }
+        cb(null, uploadDir);
+      },
       filename: (req, file, cb) => {
         const randomName = Array(32).fill(null).map(() => (Math.round(Math.random() * 16)).toString(16)).join('');
-        cb(null, `${randomName}${extname(file.originalname)}`);
+        cb(null, `cnic_${randomName}${extname(file.originalname)}`);
       },
     }),
     fileFilter: (req, file, cb) => {
-      if (file.mimetype.match(/\/(jpg|jpeg|png|pdf)$/)) {
+      if (file.mimetype.match(/\/(jpg|jpeg|png|pdf)$/i) || file.originalname.match(/\.(jpg|jpeg|png|pdf)$/i)) {
         cb(null, true);
       } else {
         cb(new BadRequestException('Unsupported file type'), false);
@@ -29,11 +36,12 @@ export class AuthController {
     },
   }))
   async register(@Body() registerDto: RegisterDto, @UploadedFile() file: Express.Multer.File) {
-    if (registerDto.role === 'seller' && !file) {
+    console.log('[AuthController] Register request role:', registerDto.role, 'File received:', file ? file.filename : 'NO FILE');
+    if (registerDto.role === 'seller' && !file && !registerDto.cnicImage) {
       throw new BadRequestException('CNIC Image/PDF is required for sellers');
     }
     if (file) {
-      registerDto.cnicImage = file.path;
+      registerDto.cnicImage = file.path.replace(/\\/g, '/');
     }
     return this.authService.register(registerDto);
   }
