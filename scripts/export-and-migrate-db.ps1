@@ -23,7 +23,20 @@ $databases = @(
     @{ Name = "support_db"; Container = "ecommerce-microservices-support-db-1"; Port = 5438 }
 )
 
-Write-Host "[1/2] Exporting local database records to SQL files..." -ForegroundColor Yellow
+Write-Host "[1/2] Checking local database containers..." -ForegroundColor Yellow
+
+# Start local DB containers if not already running
+try {
+    Write-Host " - Ensuring local database containers are running..." -NoNewline
+    docker-compose up -d user-db product-db cart-db order-db wishlist-db support-db 2>$null
+    Start-Sleep -Seconds 3
+    Write-Host " [OK]" -ForegroundColor Green
+} catch {
+    Write-Host " [FAILED to auto-start docker-compose]" -ForegroundColor Red
+}
+
+Write-Host ""
+Write-Host "[2/2] Exporting local database records to SQL files..." -ForegroundColor Yellow
 
 foreach ($db in $databases) {
     $dbName = $db.Name
