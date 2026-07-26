@@ -40,7 +40,7 @@ export class ProxyService {
       const isMultipart = cleanHeaders['content-type']?.toLowerCase().includes('multipart/form-data');
       const files = reqStream?.files || (reqStream as any)?.files;
 
-      // Rebuild FormData for multipart requests (guarantees clean binary file buffers + boundary parameters)
+      // Rebuild FormData for multipart requests (guarantees clean binary file buffers + boundary parameters + Content-Length)
       if (isMultipart) {
         console.log(`[ProxyService] Rebuilding multipart request for ${url}, files count: ${files?.length || 0}`);
         const form = new FormData();
@@ -63,17 +63,21 @@ export class ProxyService {
         }
 
         const formHeaders = form.getHeaders();
+        const payloadBuffer = form.getBuffer();
+
         cleanHeaders['content-type'] = formHeaders['content-type'];
+        cleanHeaders['content-length'] = String(payloadBuffer.length);
 
         const config: any = {
           method,
           url,
           headers: cleanHeaders,
-          data: form,
+          data: payloadBuffer,
           maxRedirects: 0,
           validateStatus: (status: number) => status >= 200 && status < 500,
         };
 
+        console.log(`[ProxyService] Forwarding multipart ${method} ${url} (Buffer size: ${payloadBuffer.length} bytes)`);
         const response = await firstValueFrom(this.httpService.request(config));
         return {
           status: response.status,
