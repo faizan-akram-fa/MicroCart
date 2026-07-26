@@ -31,6 +31,8 @@ export class ProxyService {
       if (headers?.authorization) cleanHeaders.authorization = headers.authorization;
       if (headers?.Authorization) cleanHeaders.authorization = headers.Authorization;
       cleanHeaders['content-type'] = headers?.['content-type'] || headers?.['Content-Type'] || 'application/json';
+      if (headers?.['x-forwarded-host'] || headers?.host) cleanHeaders['x-forwarded-host'] = headers['x-forwarded-host'] || headers.host;
+      if (headers?.['x-forwarded-proto']) cleanHeaders['x-forwarded-proto'] = headers['x-forwarded-proto'];
 
       const config: any = {
         method,

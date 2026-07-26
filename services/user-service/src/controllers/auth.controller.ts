@@ -67,15 +67,15 @@ export class AuthController {
       const result = await this.authService.googleLogin(req.user);
       console.log(`Redirecting to frontend with role: ${result.user.role}`);
       
-      const host = req.headers?.['x-forwarded-host'] || req.headers?.host;
-      const proto = req.headers?.['x-forwarded-proto'] || 'http';
-      const frontendUrl = host ? `${proto}://${host}` : (process.env.FRONTEND_URL || 'http://localhost:3000');
+      const frontendUrl = (process.env.FRONTEND_URL && !process.env.FRONTEND_URL.includes('localhost'))
+        ? process.env.FRONTEND_URL.replace(/\/+$/, '')
+        : 'https://microcart.me';
       return res.redirect(`${frontendUrl}/auth/callback?token=${result.access_token}&role=${result.user.role}`);
     } catch (error) {
       console.error('❌ Google Auth Redirect Error:', error.message);
-      const host = req.headers?.['x-forwarded-host'] || req.headers?.host;
-      const proto = req.headers?.['x-forwarded-proto'] || 'http';
-      const frontendUrl = host ? `${proto}://${host}` : (process.env.FRONTEND_URL || 'http://localhost:3000');
+      const frontendUrl = (process.env.FRONTEND_URL && !process.env.FRONTEND_URL.includes('localhost'))
+        ? process.env.FRONTEND_URL.replace(/\/+$/, '')
+        : 'https://microcart.me';
       return res.redirect(`${frontendUrl}/login?error=${encodeURIComponent(error.message)}`);
     }
   }
