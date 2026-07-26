@@ -34,8 +34,18 @@ export class ProxyService {
       if (headers?.Authorization) cleanHeaders.authorization = headers.Authorization;
       if (headers?.['content-type']) cleanHeaders['content-type'] = headers['content-type'];
       if (headers?.['Content-Type']) cleanHeaders['content-type'] = headers['Content-Type'];
+      if (headers?.accept) cleanHeaders.accept = headers.accept;
+      if (headers?.Accept) cleanHeaders.accept = headers.Accept;
       if (headers?.['x-forwarded-host'] || headers?.host) cleanHeaders['x-forwarded-host'] = headers['x-forwarded-host'] || headers.host;
       if (headers?.['x-forwarded-proto']) cleanHeaders['x-forwarded-proto'] = headers['x-forwarded-proto'];
+
+      if (path.startsWith('uploads') || path.match(/\.(png|jpg|jpeg|gif|webp|pdf|svg)$/i)) {
+        if (method === 'GET') {
+          delete cleanHeaders['content-type'];
+          delete cleanHeaders['Content-Type'];
+        }
+        cleanHeaders.accept = '*/*';
+      }
 
       const isMultipart = cleanHeaders['content-type']?.toLowerCase().includes('multipart/form-data');
       const files = reqStream?.files || (reqStream as any)?.files;
