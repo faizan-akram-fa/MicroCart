@@ -59,15 +59,16 @@ export class UserController {
       },
     }),
     fileFilter: (req, file, cb) => {
-      if (!file.mimetype.match(/\/(jpg|jpeg|png|gif)$/)) {
-        return cb(new BadRequestException('Only image files are allowed!'), false);
+      if (file.mimetype.match(/\/(jpg|jpeg|png|gif|pdf)$/i) || file.originalname.match(/\.(jpg|jpeg|png|gif|pdf)$/i)) {
+        cb(null, true);
+      } else {
+        cb(new BadRequestException('Only image or PDF files are allowed!'), false);
       }
-      cb(null, true);
     },
   }))
   async uploadCnicImage(@Req() req, @UploadedFile() file) {
     if (!file) {
-      throw new BadRequestException('File is not an image');
+      throw new BadRequestException('CNIC Document upload failed. Please upload a valid JPG, PNG, or PDF file.');
     }
     const frontendUrl = (process.env.FRONTEND_URL && !process.env.FRONTEND_URL.includes('localhost'))
       ? process.env.FRONTEND_URL.replace(/\/+$/, '')
