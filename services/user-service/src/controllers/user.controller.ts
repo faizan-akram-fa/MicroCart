@@ -59,7 +59,13 @@ export class UserController {
       },
     }),
     fileFilter: (req, file, cb) => {
-      if (file.mimetype.match(/\/(jpg|jpeg|png|gif|pdf)$/i) || file.originalname.match(/\.(jpg|jpeg|png|gif|pdf)$/i)) {
+      const isImageOrPdf =
+        !file.mimetype ||
+        file.mimetype === 'application/octet-stream' ||
+        file.mimetype.match(/\/(jpg|jpeg|png|gif|pdf|webp|bmp|svg\+xml)$/i) ||
+        file.originalname.match(/\.(jpg|jpeg|png|gif|pdf|webp|bmp)$/i);
+
+      if (isImageOrPdf) {
         cb(null, true);
       } else {
         cb(new BadRequestException('Only image or PDF files are allowed!'), false);

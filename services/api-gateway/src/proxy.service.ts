@@ -47,9 +47,12 @@ export class ProxyService {
 
         if (files && Array.isArray(files)) {
           for (const file of files) {
+            const safeContentType = (file.mimetype && file.mimetype !== 'application/octet-stream')
+              ? file.mimetype
+              : 'image/jpeg';
             form.append(file.fieldname, file.buffer, {
-              filename: file.originalname,
-              contentType: file.mimetype,
+              filename: file.originalname || 'upload.jpg',
+              contentType: safeContentType,
             });
           }
         }

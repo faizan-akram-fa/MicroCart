@@ -38,10 +38,17 @@ export class ProductController {
       },
     }),
     fileFilter: (req, file, cb) => {
-      if (!file.originalname.match(/\.(jpg|jpeg|png|gif)$/)) {
-        return cb(new BadRequestException('Only image files are allowed!'), false);
+      const isImage =
+        !file.mimetype ||
+        file.mimetype === 'application/octet-stream' ||
+        file.mimetype.match(/\/(jpg|jpeg|png|gif|webp|bmp|svg\+xml)$/i) ||
+        file.originalname.match(/\.(jpg|jpeg|png|gif|webp|bmp)$/i);
+
+      if (isImage) {
+        cb(null, true);
+      } else {
+        cb(new BadRequestException('Only image files are allowed!'), false);
       }
-      cb(null, true);
     },
   }))
   async create(
