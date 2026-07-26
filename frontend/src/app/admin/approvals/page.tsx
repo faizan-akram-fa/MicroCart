@@ -178,7 +178,7 @@ export default function SellerApprovals() {
                 <div className="mb-4">
                   <p className="text-sm text-gray-500 mb-2"><strong>CNIC Number:</strong> {seller.cnicNumber || 'Not provided'}</p>
                   
-                  {seller.cnicImage ? (
+                  {getCnicUrl(seller.cnicImage) ? (
                     <div className="mt-4 rounded-2xl overflow-hidden border border-gray-200 dark:border-gray-700 mr-auto flex bg-gray-50 dark:bg-gray-800 justify-center items-center relative group" style={{ height: '200px', width: '350px' }}>
                       <img 
                         src={getCnicUrl(seller.cnicImage)!} 
@@ -199,7 +199,7 @@ export default function SellerApprovals() {
                   ) : (
                     <div className="mt-4 bg-red-50 dark:bg-red-900/20 text-red-600 dark:text-red-400 p-4 rounded-xl text-sm flex items-start border border-red-100 dark:border-red-900/30">
                       <AlertCircle className="w-5 h-5 mr-2 flex-shrink-0 mt-0.5" />
-                      <div>No CNIC document was uploaded by this user. They cannot be approved until they provide verification.</div>
+                      <div>No valid CNIC document was uploaded by this user. They cannot be approved until they provide verification.</div>
                     </div>
                   )}
                 </div>
