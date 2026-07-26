@@ -14,6 +14,8 @@ import { AdminController } from './controllers/admin.controller';
 import { InternalEmailController } from './controllers/internal-email.controller';
 import { JwtStrategy } from './strategies/jwt.strategy';
 import { GoogleStrategy } from './strategies/google.strategy';
+import { ServeStaticModule } from '@nestjs/serve-static';
+import { join } from 'path';
 import { EmailModule } from './modules/email/email.module';
 import { HttpModule } from '@nestjs/axios';
 
@@ -21,6 +23,10 @@ import { HttpModule } from '@nestjs/axios';
   imports: [
     EmailModule,
     HttpModule,
+    ServeStaticModule.forRoot({
+      rootPath: join(process.cwd(), 'uploads'),
+      serveRoot: '/uploads',
+    }),
     ConfigModule.forRoot({
       isGlobal: true,
     }),

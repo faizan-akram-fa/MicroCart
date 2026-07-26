@@ -103,7 +103,30 @@ export class GatewayController {
       const isUploadOrBinary = path.startsWith('uploads') || contentType.includes('image') || contentType.includes('pdf') || contentType.includes('octet-stream');
 
       if (isUploadOrBinary) {
-        if (!contentType || contentType.includes('json')) {
+        const buffer = Buffer.isBuffer(result.data)
+          ? result.data
+          : (result.data instanceof ArrayBuffer || ArrayBuffer.isView(result.data))
+            ? Buffer.from(result.data as any)
+            : typeof result.data === 'string'
+              ? Buffer.from(result.data, 'binary')
+              : Buffer.from(String(result.data), 'binary');
+
+        // Dynamic Magic Byte Inspection (overrides wrong extensions or generic octet-stream headers)
+        if (buffer && buffer.length >= 4) {
+          if (buffer[0] === 0x89 && buffer[1] === 0x50 && buffer[2] === 0x4e && buffer[3] === 0x47) {
+            contentType = 'image/png';
+          } else if (buffer[0] === 0xff && buffer[1] === 0xd8 && buffer[2] === 0xff) {
+            contentType = 'image/jpeg';
+          } else if (buffer[0] === 0x25 && buffer[1] === 0x50 && buffer[2] === 0x44 && buffer[3] === 0x46) {
+            contentType = 'application/pdf';
+          } else if (buffer[0] === 0x47 && buffer[1] === 0x49 && buffer[2] === 0x46 && buffer[3] === 0x38) {
+            contentType = 'image/gif';
+          } else if (buffer[0] === 0x52 && buffer[1] === 0x49 && buffer[2] === 0x46 && buffer[3] === 0x46) {
+            contentType = 'image/webp';
+          }
+        }
+
+        if (!contentType || contentType.includes('json') || contentType.includes('octet-stream')) {
           const ext = extname(path).toLowerCase();
           if (ext === '.png') contentType = 'image/png';
           else if (ext === '.jpg' || ext === '.jpeg') contentType = 'image/jpeg';
@@ -115,14 +138,8 @@ export class GatewayController {
         }
 
         res.setHeader('Content-Type', contentType);
-        const buffer = Buffer.isBuffer(result.data)
-          ? result.data
-          : (result.data instanceof ArrayBuffer || ArrayBuffer.isView(result.data))
-            ? Buffer.from(result.data as any)
-            : typeof result.data === 'string'
-              ? Buffer.from(result.data, 'binary')
-              : Buffer.from(String(result.data), 'binary');
-
+        res.setHeader('Cache-Control', 'public, max-age=86400');
+        res.setHeader('Content-Length', String(buffer.length));
         return res.status(result.status).send(buffer);
       }
 
