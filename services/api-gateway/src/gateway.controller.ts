@@ -76,7 +76,7 @@ export class GatewayController {
   ) {
     try {
       const rawUrl = req.originalUrl || req.url;
-      const path = rawUrl.replace(/^\/api\//, '').replace(/^\//, '');
+      const path = rawUrl.replace(/^(\/api)+/, '').replace(/^\//, '');
       console.log(`[GatewayController] Proxying ${req.method} ${rawUrl} -> service: ${service}, path: ${path}`);
 
       const result = await this.proxyService.proxyRequest(
