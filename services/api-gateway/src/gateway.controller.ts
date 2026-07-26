@@ -6,11 +6,14 @@ import {
   Res,
   HttpException,
   HttpStatus,
+  UseInterceptors,
 } from '@nestjs/common';
+import { AnyFilesInterceptor } from '@nestjs/platform-express';
 import { Request, Response } from 'express';
 import { ProxyService } from './proxy.service';
 
 @Controller()
+@UseInterceptors(AnyFilesInterceptor())
 export class GatewayController {
   constructor(private proxyService: ProxyService) { }
 

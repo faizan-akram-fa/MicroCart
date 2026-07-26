@@ -1,7 +1,7 @@
 import { Injectable } from '@nestjs/common';
 import { HttpService } from '@nestjs/axios';
 import { firstValueFrom } from 'rxjs';
-import * as http from 'http';
+import * as FormData from 'form-data';
 
 @Injectable()
 export class ProxyService {
@@ -38,46 +38,48 @@ export class ProxyService {
       if (headers?.['x-forwarded-proto']) cleanHeaders['x-forwarded-proto'] = headers['x-forwarded-proto'];
 
       const isMultipart = cleanHeaders['content-type']?.toLowerCase().includes('multipart/form-data');
+      const files = reqStream?.files || (reqStream as any)?.files;
 
-      // Native HTTP stream proxying for multipart requests (preserves raw binary file streams and boundaries)
-      if (isMultipart && reqStream) {
-        console.log(`[ProxyService] Streaming multipart request to ${url}`);
-        return new Promise((resolve, reject) => {
-          const targetUrl = new URL(url);
-          const proxyReq = http.request(
-            {
-              hostname: targetUrl.hostname,
-              port: targetUrl.port,
-              path: targetUrl.pathname + targetUrl.search,
-              method: method,
-              headers: cleanHeaders,
-            },
-            (proxyRes) => {
-              let responseData = '';
-              proxyRes.on('data', (chunk) => {
-                responseData += chunk;
-              });
-              proxyRes.on('end', () => {
-                let parsed = responseData;
-                try {
-                  parsed = JSON.parse(responseData);
-                } catch (e) {}
-                resolve({
-                  status: proxyRes.statusCode || 200,
-                  headers: proxyRes.headers,
-                  data: parsed,
-                });
-              });
-            },
-          );
+      // Rebuild FormData for multipart requests (guarantees clean binary file buffers + boundary parameters)
+      if (isMultipart) {
+        console.log(`[ProxyService] Rebuilding multipart request for ${url}, files count: ${files?.length || 0}`);
+        const form = new FormData();
 
-          proxyReq.on('error', (err) => {
-            console.error('[ProxyService] Stream proxy error:', err.message);
-            reject(err);
-          });
+        if (files && Array.isArray(files)) {
+          for (const file of files) {
+            form.append(file.fieldname, file.buffer, {
+              filename: file.originalname,
+              contentType: file.mimetype,
+            });
+          }
+        }
 
-          reqStream.pipe(proxyReq);
-        });
+        if (body && typeof body === 'object') {
+          for (const key of Object.keys(body)) {
+            if (body[key] !== undefined && body[key] !== null) {
+              form.append(key, String(body[key]));
+            }
+          }
+        }
+
+        const formHeaders = form.getHeaders();
+        cleanHeaders['content-type'] = formHeaders['content-type'];
+
+        const config: any = {
+          method,
+          url,
+          headers: cleanHeaders,
+          data: form,
+          maxRedirects: 0,
+          validateStatus: (status: number) => status >= 200 && status < 500,
+        };
+
+        const response = await firstValueFrom(this.httpService.request(config));
+        return {
+          status: response.status,
+          headers: response.headers,
+          data: response.data,
+        };
       }
 
       const config: any = {
