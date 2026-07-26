@@ -51,7 +51,7 @@ const sidebarItems = [
   { name: 'Inventory', href: '/admin/inventory', icon: Package, requiredPermission: 'VIEW_INVENTORY' },
   { name: 'Sub-Admins', href: '/admin/sub-admins', icon: ShieldCheck, adminOnly: true },
   { name: 'System Logs', href: '/admin/logs', icon: FileText, requiredPermission: 'VIEW_LOGS' },
-  { name: 'Live Monitoring ↗', href: 'http://localhost:3010/d/microcart-monitoring', icon: Activity, isExternal: true, requiredPermission: 'VIEW_LOGS' },
+  { name: 'Live Monitoring ↗', href: '/grafana/d/microcart-monitoring', icon: Activity, isExternal: true, requiredPermission: 'VIEW_LOGS' },
   { name: 'Communications', href: '/admin/communications', icon: Send, requiredPermission: 'SEND_COMMUNICATIONS' },
   { name: 'Promotions', href: '/admin/promotions', icon: Tag, requiredPermission: 'MANAGE_PROMOTIONS' },
   { name: 'Reviews', href: '/admin/reviews', icon: MessageSquare, requiredPermission: 'MANAGE_REVIEWS' },
