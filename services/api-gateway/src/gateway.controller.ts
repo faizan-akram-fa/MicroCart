@@ -137,10 +137,10 @@ export class GatewayController {
           else contentType = 'image/jpeg';
         }
 
-        res.setHeader('Content-Type', contentType);
+        res.type(contentType || 'image/jpeg');
         res.setHeader('Cache-Control', 'public, max-age=86400');
         res.setHeader('Content-Length', String(buffer.length));
-        return res.status(result.status).send(buffer);
+        return res.status(result.status).end(buffer);
       }
 
       if (contentType) {
