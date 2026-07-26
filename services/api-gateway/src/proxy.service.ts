@@ -1,6 +1,7 @@
 import { Injectable } from '@nestjs/common';
 import { HttpService } from '@nestjs/axios';
 import { firstValueFrom } from 'rxjs';
+import * as http from 'http';
 
 @Injectable()
 export class ProxyService {
@@ -38,6 +39,47 @@ export class ProxyService {
 
       const isMultipart = cleanHeaders['content-type']?.toLowerCase().includes('multipart/form-data');
 
+      // Native HTTP stream proxying for multipart requests (preserves raw binary file streams and boundaries)
+      if (isMultipart && reqStream) {
+        console.log(`[ProxyService] Streaming multipart request to ${url}`);
+        return new Promise((resolve, reject) => {
+          const targetUrl = new URL(url);
+          const proxyReq = http.request(
+            {
+              hostname: targetUrl.hostname,
+              port: targetUrl.port,
+              path: targetUrl.pathname + targetUrl.search,
+              method: method,
+              headers: cleanHeaders,
+            },
+            (proxyRes) => {
+              let responseData = '';
+              proxyRes.on('data', (chunk) => {
+                responseData += chunk;
+              });
+              proxyRes.on('end', () => {
+                let parsed = responseData;
+                try {
+                  parsed = JSON.parse(responseData);
+                } catch (e) {}
+                resolve({
+                  status: proxyRes.statusCode || 200,
+                  headers: proxyRes.headers,
+                  data: parsed,
+                });
+              });
+            },
+          );
+
+          proxyReq.on('error', (err) => {
+            console.error('[ProxyService] Stream proxy error:', err.message);
+            reject(err);
+          });
+
+          reqStream.pipe(proxyReq);
+        });
+      }
+
       const config: any = {
         method,
         url,
@@ -47,11 +89,7 @@ export class ProxyService {
       };
 
       if (method === 'POST' || method === 'PUT' || method === 'PATCH') {
-        if (isMultipart && reqStream) {
-          config.data = reqStream;
-        } else {
-          config.data = body;
-        }
+        config.data = body;
       }
 
       console.log(`[ProxyService] Forwarding ${method} ${url} with body:`, JSON.stringify(body));
