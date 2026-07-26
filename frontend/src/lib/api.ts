@@ -63,7 +63,7 @@ export default api;
 export const authAPI = {
   register: (data: any) => {
     if (data instanceof FormData) {
-      return api.post(`${USER_SERVICE_URL}/auth/register`, data, {
+      return api.post('/auth/register', data, {
         headers: { 'Content-Type': 'multipart/form-data' },
       });
     }
