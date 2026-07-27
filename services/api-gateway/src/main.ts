@@ -8,14 +8,24 @@ async function bootstrap() {
   const app = await NestFactory.create(AppModule);
 
   // Parse incoming multipart file streams into memory buffers only for multipart requests
-  const memoryUpload = multer({ storage: multer.memoryStorage() }).any();
+  const memoryUpload = multer({
+    storage: multer.memoryStorage(),
+    limits: { fileSize: 10 * 1024 * 1024 }
+  }).any();
+
   app.use((req: any, res: any, next: any) => {
     if (req.path === '/api/health' || req.path === '/health' || req.path === '/metrics') {
       return next();
     }
     const contentType = req.headers['content-type'] || req.headers['Content-Type'] || '';
     if (contentType.toString().toLowerCase().includes('multipart/form-data')) {
-      return memoryUpload(req, res, next);
+      return memoryUpload(req, res, (err: any) => {
+        if (err) {
+          console.error('[ApiGateway] Multipart parse error:', err?.message || err);
+          return next(err);
+        }
+        next();
+      });
     }
     next();
   });
