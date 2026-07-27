@@ -4,6 +4,7 @@ import React, { useEffect, useState, Suspense } from 'react';
 import Link from 'next/link';
 import { useSearchParams } from 'next/navigation';
 import { CheckCircle, ShoppingBag, ArrowRight, Heart } from 'lucide-react';
+import { ordersAPI } from '@/lib/api';
 
 function SuccessDetails() {
   const searchParams = useSearchParams();
@@ -13,23 +14,11 @@ function SuccessDetails() {
 
   useEffect(() => {
     setMounted(true);
-    // If we want to simulate a webhook call for mock sessions immediately:
-    if (sessionId && sessionId.startsWith('cs_mock_') && orderId) {
-      // Direct call to public local webhook to automatically transition the order
-      fetch(`http://localhost:3004/orders/stripe-webhook`, {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({
-          type: 'checkout.session.completed',
-          data: {
-            object: {
-              id: sessionId,
-              payment_status: 'paid',
-              metadata: { orderId }
-            }
-          }
-        })
-      }).catch(err => console.warn('Could not run mock webhook trigger:', err));
+    if (orderId) {
+      // Transition order status to paid upon returning from successful Stripe Checkout
+      ordersAPI.updateStatus(orderId, 'paid').catch((err: any) => {
+        console.log('Order status update notice:', err);
+      });
     }
   }, [sessionId, orderId]);
 
