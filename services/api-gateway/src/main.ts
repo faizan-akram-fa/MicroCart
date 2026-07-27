@@ -33,6 +33,7 @@ async function bootstrap() {
   // ── Prometheus Metrics Setup ────────────────────────────────────────────────
   const SERVICE_NAME = 'api-gateway';
   const metricsRegistry = new Registry();
+  metricsRegistry.clear();
   metricsRegistry.setDefaultLabels({ service: SERVICE_NAME });
   collectDefaultMetrics({ register: metricsRegistry });
 

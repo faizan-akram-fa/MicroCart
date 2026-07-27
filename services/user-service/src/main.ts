@@ -12,6 +12,7 @@ async function bootstrap() {
   // ── Prometheus Metrics Setup ────────────────────────────────────────────────
   const SERVICE_NAME = 'user-service';
   const metricsRegistry = new Registry();
+  metricsRegistry.clear();
   metricsRegistry.setDefaultLabels({ service: SERVICE_NAME });
   collectDefaultMetrics({ register: metricsRegistry });
 
