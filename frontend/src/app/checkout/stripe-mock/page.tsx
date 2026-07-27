@@ -1,226 +1,275 @@
 'use client';
 
-import React, { useState, useEffect, Suspense } from 'react';
+import { useState, useEffect, Suspense } from 'react';
 import { useSearchParams, useRouter } from 'next/navigation';
-import { CreditCard, Shield, Info, ArrowLeft, Loader, CheckCircle2 } from 'lucide-react';
-import toast from 'react-hot-toast';
+import { cartAPI, ordersAPI } from '@/lib/api';
+import toast, { Toaster } from 'react-hot-toast';
+import { 
+  ShieldCheck, 
+  Lock, 
+  CreditCard, 
+  CheckCircle2, 
+  Loader, 
+  ArrowLeft,
+  Calendar,
+  KeyRound
+} from 'lucide-react';
 
-function StripeMockDetails() {
+function StripeMockContent() {
   const searchParams = useSearchParams();
-  const orderId = searchParams.get('order_id') || '';
-  const amount = searchParams.get('amount') || '0';
+  const router = useRouter();
 
-  const [cardNumber, setCardNumber] = useState('');
-  const [expiry, setExpiry] = useState('');
-  const [cvc, setCvc] = useState('');
-  const [name, setName] = useState('');
-  const [loading, setLoading] = useState(false);
-  const [mounted, setMounted] = useState(false);
+  const orderId = searchParams.get('order_id') || searchParams.get('orderId') || '';
+  const amountParam = searchParams.get('amount') || '0';
+  const amount = parseFloat(amountParam);
+
+  const [cardNumber, setCardNumber] = useState('4242  4242  4242  4242');
+  const [expiry, setExpiry] = useState('12 / 28');
+  const [cvc, setCvc] = useState('123');
+  const [cardHolder, setCardHolder] = useState('Stripe Test Customer');
+  
+  const [isProcessing, setIsProcessing] = useState(false);
+  const [step, setStep] = useState<'input' | 'processing' | 'success'>('input');
+  const [statusText, setStatusText] = useState('Contacting Stripe Payment Gateway...');
 
   useEffect(() => {
-    setMounted(true);
-  }, []);
+    // Security check: if order is already paid, redirect away
+    if (typeof window !== 'undefined' && orderId) {
+      const isPaid = sessionStorage.getItem(`paid_order_${orderId}`);
+      if (isPaid) {
+        toast.success('Order payment is already finalized');
+        router.replace('/orders');
+      }
+    }
+  }, [orderId, router]);
 
-  if (!mounted) return null;
-
-  const handlePay = (e: React.FormEvent) => {
+  const handlePay = async (e: React.FormEvent) => {
     e.preventDefault();
-    if (cardNumber.length < 16) {
-      toast.error('Please enter a valid 16-digit card number');
-      return;
-    }
-    if (expiry.length < 4) {
-      toast.error('Please enter a valid expiry date (MM/YY)');
-      return;
-    }
-    if (cvc.length < 3) {
-      toast.error('Please enter a valid 3-digit CVC');
-      return;
-    }
+    setIsProcessing(true);
+    setStep('processing');
 
-    setLoading(true);
-    toast.loading('Processing payment securely...', { id: 'stripe-pay' });
+    const steps = [
+      'Authenticating Stripe API Key...',
+      'Verifying Card Details with Issuing Bank...',
+      'Performing 3D Secure Authorization...',
+      'Settling Funds & Updating Order Status...'
+    ];
 
-    setTimeout(() => {
-      setLoading(false);
-      toast.success('Payment authorized successfully!', { id: 'stripe-pay' });
-      // Generate a mock Stripe checkout session ID starting with 'cs_mock_' so success page triggers webhook confirmation
-      const mockSessionId = `cs_mock_${Math.floor(100000 + Math.random() * 900000)}`;
-      window.location.href = `/checkout/success?session_id=${mockSessionId}&order_id=${orderId}`;
-    }, 2000);
-  };
+    let currentStep = 0;
+    const interval = setInterval(() => {
+      if (currentStep < steps.length - 1) {
+        currentStep++;
+        setStatusText(steps[currentStep]);
+      }
+    }, 700);
 
-  const handleCancel = () => {
-    toast.error('Payment cancelled by user');
-    window.location.href = `/checkout/cancel?order_id=${orderId}`;
+    try {
+      setTimeout(async () => {
+        clearInterval(interval);
+        
+        // Confirm order status in backend if orderId is provided
+        if (orderId) {
+          try {
+            await ordersAPI.updateStatus(orderId, 'paid');
+          } catch (err) {
+            console.log('Order status auto-update notice:', err);
+          }
+        }
+
+        await cartAPI.clear();
+        if (typeof window !== 'undefined' && orderId) {
+          sessionStorage.setItem(`paid_order_${orderId}`, 'true');
+        }
+
+        setStep('success');
+        toast.success('Stripe Payment Verified Successfully!');
+
+        setTimeout(() => {
+          router.replace('/orders');
+        }, 1500);
+      }, 3000);
+
+    } catch (error: any) {
+      clearInterval(interval);
+      setIsProcessing(false);
+      setStep('input');
+      toast.error('Payment processing failed. Please try again.');
+    }
   };
 
   return (
-    <div className="grid md:grid-cols-12 gap-8 items-start">
-      {/* Left Column: Order Summary */}
-      <div className="md:col-span-5 bg-slate-50 dark:bg-slate-950 p-8 rounded-3xl border border-slate-100 dark:border-slate-800 space-y-6 text-left">
-        <div>
-          <span className="text-[10px] font-black tracking-widest text-slate-400 uppercase">MicroCart Checkout Gateway</span>
-          <h2 className="text-2xl font-black text-slate-800 dark:text-white mt-1">Payment Summary</h2>
+    <div className="min-h-screen bg-slate-950 text-slate-100 flex flex-col justify-between py-8 px-4 animate-fade-in font-sans">
+      <Toaster position="top-center" />
+
+      {/* Top Header */}
+      <header className="max-w-md w-full mx-auto flex items-center justify-between pb-6 border-b border-slate-800">
+        <div className="flex items-center space-x-2">
+          <div className="bg-indigo-600 text-white p-1.5 rounded-lg font-black text-sm tracking-tighter">
+            STRIPE
+          </div>
+          <span className="text-xs font-bold text-slate-400 uppercase tracking-widest">Test Gateway</span>
         </div>
-
-        <div className="border-t border-b border-dashed border-slate-200 dark:border-slate-800 py-4 space-y-3">
-          <div className="flex justify-between text-sm font-medium">
-            <span className="text-slate-400">Order ID</span>
-            <span className="font-mono text-slate-700 dark:text-slate-300 font-bold">{orderId.slice(0, 16)}...</span>
-          </div>
-          <div className="flex justify-between text-sm font-medium">
-            <span className="text-slate-400">Merchant</span>
-            <span className="text-slate-700 dark:text-slate-300 font-bold">MicroCart Network Inc.</span>
-          </div>
-          <div className="flex justify-between text-sm font-medium">
-            <span className="text-slate-400">Currency</span>
-            <span className="text-slate-700 dark:text-slate-300 font-bold">PKR (Rs)</span>
-          </div>
+        <div className="flex items-center text-xs text-emerald-400 bg-emerald-950/60 px-2.5 py-1 rounded-full border border-emerald-800/50 font-medium">
+          <Lock className="w-3 h-3 mr-1.5" /> 256-bit SSL Encrypted
         </div>
+      </header>
 
-        <div className="flex justify-between items-baseline">
-          <span className="text-sm font-black text-slate-850 dark:text-slate-300 uppercase">Amount Due</span>
-          <span className="text-3xl font-black text-indigo-600 dark:text-indigo-400">Rs {Number(amount).toLocaleString()}</span>
-        </div>
+      {/* Main Container */}
+      <main className="max-w-md w-full mx-auto my-auto py-8">
+        <div className="bg-slate-900 border border-slate-800 rounded-3xl p-6 sm:p-8 shadow-2xl relative overflow-hidden">
+          {/* Subtle Top Accent */}
+          <div className="absolute top-0 inset-x-0 h-1 bg-gradient-to-r from-indigo-500 via-purple-500 to-pink-500"></div>
 
-        <div className="bg-indigo-50/50 dark:bg-indigo-950/20 rounded-2xl p-4 border border-indigo-100/30 flex items-start gap-3">
-          <Shield className="w-5 h-5 text-indigo-500 mt-0.5 flex-shrink-0" />
-          <div className="text-[11px] text-indigo-650 dark:text-indigo-400 leading-relaxed font-semibold">
-            This is a mock Stripe Checkout environment. No real funds will be charged. You can test payment success or cancellation.
-          </div>
-        </div>
-      </div>
+          {step === 'input' && (
+            <form onSubmit={handlePay} className="space-y-6">
+              {/* Order Amount Banner */}
+              <div className="bg-slate-950/70 border border-slate-800/80 p-4 rounded-2xl flex justify-between items-center">
+                <div>
+                  <p className="text-[10px] font-bold text-slate-400 uppercase tracking-wider">Total Amount</p>
+                  <p className="text-2xl font-black text-white tracking-tight">
+                    PKR {amount ? amount.toLocaleString() : '0'}
+                  </p>
+                </div>
+                <div className="text-right">
+                  <p className="text-[10px] font-bold text-slate-400 uppercase tracking-wider">Merchant</p>
+                  <p className="text-xs font-bold text-indigo-400">MicroCart Store</p>
+                </div>
+              </div>
 
-      {/* Right Column: Stripe Form Card */}
-      <form onSubmit={handlePay} className="md:col-span-7 bg-white dark:bg-slate-900 border border-slate-100 dark:border-slate-800 p-8 rounded-3xl shadow-xl space-y-6 text-left relative overflow-hidden">
-        {loading && (
-          <div className="absolute inset-0 bg-white/80 dark:bg-slate-900/80 backdrop-blur-sm z-50 flex flex-col items-center justify-center space-y-3">
-            <Loader className="w-10 h-10 text-indigo-600 animate-spin" />
-            <span className="text-xs font-black text-indigo-600 uppercase tracking-widest animate-pulse">Authorizing Card...</span>
-          </div>
-        )}
+              {/* Simulated Credit Card Preview */}
+              <div className="w-full h-44 bg-gradient-to-br from-indigo-900 via-slate-900 to-slate-950 p-5 rounded-2xl flex flex-col justify-between shadow-xl border border-indigo-500/30 relative">
+                <div className="flex justify-between items-start">
+                  <div className="w-10 h-7 bg-amber-400/80 rounded-md border border-amber-300 relative overflow-hidden">
+                    <div className="absolute inset-y-0 left-3 w-0.5 bg-slate-900"></div>
+                    <div className="absolute inset-x-0 top-3 h-0.5 bg-slate-900"></div>
+                  </div>
+                  <span className="text-lg font-black italic tracking-tighter text-white">VISA</span>
+                </div>
 
-        <div className="flex items-center justify-between">
-          <h3 className="text-lg font-black text-slate-800 dark:text-white flex items-center gap-2">
-            <CreditCard className="w-5 h-5 text-indigo-600" /> Card Information
-          </h3>
-          <span className="bg-indigo-500/10 border border-indigo-400/20 text-indigo-500 text-[9px] font-black tracking-widest px-2.5 py-0.5 rounded-full uppercase">Stripe Mock</span>
-        </div>
+                <div>
+                  <p className="text-lg font-mono tracking-widest text-slate-100 mb-2">
+                    {cardNumber}
+                  </p>
+                  <div className="flex justify-between text-[10px] text-slate-400 uppercase tracking-wider font-mono">
+                    <span>{cardHolder}</span>
+                    <span>{expiry}</span>
+                  </div>
+                </div>
+              </div>
 
-        {/* Card Fields Form */}
-        <div className="space-y-4">
-          <div className="space-y-1.5">
-            <label className="text-[10px] font-bold text-slate-400 uppercase tracking-wider block">Cardholder Name</label>
-            <input
-              type="text"
-              required
-              value={name}
-              onChange={(e) => setName(e.target.value)}
-              placeholder="e.g. John Doe"
-              className="w-full px-4 py-3 bg-slate-50 dark:bg-slate-800 border border-slate-150 dark:border-slate-700/60 rounded-xl focus:border-indigo-500 focus:ring-2 focus:ring-indigo-500/10 outline-none text-sm font-semibold text-slate-800 dark:text-white transition-all"
-            />
-          </div>
+              {/* Form Inputs */}
+              <div className="space-y-4">
+                <div>
+                  <label className="block text-xs font-bold text-slate-400 uppercase tracking-wider mb-1.5">
+                    Card Number
+                  </label>
+                  <div className="relative">
+                    <input
+                      type="text"
+                      value={cardNumber}
+                      onChange={(e) => setCardNumber(e.target.value)}
+                      className="w-full bg-slate-950 border border-slate-800 rounded-xl px-4 py-3 text-sm font-mono text-white focus:outline-none focus:border-indigo-500 transition-all pl-11"
+                      required
+                    />
+                    <CreditCard className="w-5 h-5 text-slate-500 absolute left-3.5 top-3" />
+                  </div>
+                </div>
 
-          <div className="space-y-1.5">
-            <label className="text-[10px] font-bold text-slate-400 uppercase tracking-wider block">Card Number</label>
-            <div className="relative">
-              <input
-                type="text"
-                required
-                maxLength={19}
-                value={cardNumber}
-                onChange={(e) => {
-                  const val = e.target.value.replace(/\D/g, '');
-                  const formatted = val.replace(/(.{4})/g, '$1 ').trim();
-                  setCardNumber(formatted);
-                }}
-                placeholder="4242 4242 4242 4242"
-                className="w-full pl-4 pr-12 py-3 bg-slate-50 dark:bg-slate-800 border border-slate-155 dark:border-slate-700/60 rounded-xl focus:border-indigo-500 focus:ring-2 focus:ring-indigo-500/10 outline-none text-sm font-semibold text-slate-850 dark:text-white tracking-widest transition-all"
-              />
-              <CreditCard className="absolute right-4 top-1/2 -translate-y-1/2 w-4 h-4 text-slate-400" />
+                <div className="grid grid-cols-2 gap-4">
+                  <div>
+                    <label className="block text-xs font-bold text-slate-400 uppercase tracking-wider mb-1.5">
+                      Expires (MM / YY)
+                    </label>
+                    <div className="relative">
+                      <input
+                        type="text"
+                        value={expiry}
+                        onChange={(e) => setExpiry(e.target.value)}
+                        className="w-full bg-slate-950 border border-slate-800 rounded-xl px-4 py-3 text-sm font-mono text-white focus:outline-none focus:border-indigo-500 transition-all pl-11"
+                        required
+                      />
+                      <Calendar className="w-5 h-5 text-slate-500 absolute left-3.5 top-3" />
+                    </div>
+                  </div>
+
+                  <div>
+                    <label className="block text-xs font-bold text-slate-400 uppercase tracking-wider mb-1.5">
+                      CVC / CVV
+                    </label>
+                    <div className="relative">
+                      <input
+                        type="password"
+                        maxLength={4}
+                        value={cvc}
+                        onChange={(e) => setCvc(e.target.value)}
+                        className="w-full bg-slate-950 border border-slate-800 rounded-xl px-4 py-3 text-sm font-mono text-white focus:outline-none focus:border-indigo-500 transition-all pl-11"
+                        required
+                      />
+                      <KeyRound className="w-5 h-5 text-slate-500 absolute left-3.5 top-3" />
+                    </div>
+                  </div>
+                </div>
+              </div>
+
+              {/* Submit Pay Button */}
+              <button
+                type="submit"
+                className="w-full bg-indigo-600 hover:bg-indigo-500 text-white font-bold py-4 rounded-xl shadow-lg shadow-indigo-600/30 transition-all duration-200 text-base flex items-center justify-center space-x-2 active:scale-98"
+              >
+                <Lock className="w-4 h-4" />
+                <span>Pay PKR {amount ? amount.toLocaleString() : '0'}</span>
+              </button>
+
+              <p className="text-[11px] text-center text-slate-500">
+                Test mode active — uses Stripe 4242 4242 test card simulation
+              </p>
+            </form>
+          )}
+
+          {step === 'processing' && (
+            <div className="py-12 text-center space-y-6 animate-fade-in">
+              <div className="relative w-20 h-20 mx-auto flex items-center justify-center">
+                <div className="absolute inset-0 rounded-full border-4 border-indigo-500/20 border-t-indigo-500 animate-spin"></div>
+                <CreditCard className="w-8 h-8 text-indigo-400 animate-pulse" />
+              </div>
+              <div>
+                <h3 className="text-xl font-bold text-white mb-2">Authorizing Card Payment</h3>
+                <p className="text-xs text-indigo-400 font-mono animate-pulse">{statusText}</p>
+              </div>
             </div>
-          </div>
+          )}
 
-          <div className="grid grid-cols-2 gap-4">
-            <div className="space-y-1.5">
-              <label className="text-[10px] font-bold text-slate-400 uppercase tracking-wider block">Expiration Date</label>
-              <input
-                type="text"
-                required
-                maxLength={5}
-                value={expiry}
-                onChange={(e) => {
-                  const val = e.target.value.replace(/\D/g, '');
-                  if (val.length >= 2) {
-                    setExpiry(`${val.slice(0,2)}/${val.slice(2,4)}`);
-                  } else {
-                    setExpiry(val);
-                  }
-                }}
-                placeholder="MM/YY"
-                className="w-full px-4 py-3 bg-slate-50 dark:bg-slate-800 border border-slate-150 dark:border-slate-700/60 rounded-xl focus:border-indigo-500 focus:ring-2 focus:ring-indigo-500/10 outline-none text-sm font-semibold text-slate-800 dark:text-white transition-all text-center tracking-widest"
-              />
+          {step === 'success' && (
+            <div className="py-10 text-center space-y-6 animate-fade-in">
+              <div className="w-20 h-20 bg-emerald-950/80 border-2 border-emerald-500 rounded-full flex items-center justify-center mx-auto text-emerald-400 shadow-xl shadow-emerald-900/40">
+                <CheckCircle2 className="w-10 h-10 animate-bounce" />
+              </div>
+              <div>
+                <h3 className="text-2xl font-black text-white mb-2">Payment Verified!</h3>
+                <p className="text-xs text-slate-400">Your order has been authorized by Stripe.</p>
+              </div>
+              <p className="text-xs text-indigo-400 font-medium">Redirecting to your orders page...</p>
             </div>
-            <div className="space-y-1.5">
-              <label className="text-[10px] font-bold text-slate-400 uppercase tracking-wider block">CVC Security Code</label>
-              <input
-                type="password"
-                required
-                maxLength={3}
-                value={cvc}
-                onChange={(e) => setCvc(e.target.value.replace(/\D/g, ''))}
-                placeholder="•••"
-                className="w-full px-4 py-3 bg-slate-50 dark:bg-slate-800 border border-slate-150 dark:border-slate-700/60 rounded-xl focus:border-indigo-500 focus:ring-2 focus:ring-indigo-500/10 outline-none text-sm font-semibold text-slate-800 dark:text-white transition-all text-center tracking-widest"
-              />
-            </div>
-          </div>
+          )}
         </div>
+      </main>
 
-        {/* Submit Actions */}
-        <div className="space-y-3 pt-4 border-t border-slate-100 dark:border-slate-800/80">
-          <button
-            type="submit"
-            className="w-full inline-flex items-center justify-center px-6 py-4 border border-transparent text-sm font-black rounded-2xl text-white bg-indigo-600 hover:bg-indigo-700 active:bg-indigo-800 shadow-md hover:shadow-lg transition-all"
-          >
-            Pay Rs {Number(amount).toLocaleString()}
-          </button>
-          
-          <button
-            type="button"
-            onClick={handleCancel}
-            className="w-full inline-flex items-center justify-center px-6 py-3.5 border border-slate-100 dark:border-slate-800 text-sm font-bold rounded-2xl text-rose-500 hover:bg-rose-50 dark:hover:bg-rose-950/20 hover:border-rose-200 transition-all gap-1.5"
-          >
-            Cancel and Return to Merchant
-          </button>
-        </div>
-      </form>
+      {/* Footer */}
+      <footer className="max-w-md w-full mx-auto text-center pt-6 border-t border-slate-800 text-[11px] text-slate-500">
+        <p>Powered by Stripe Payment Gateway • 256-Bit TLS Encryption</p>
+      </footer>
     </div>
   );
 }
 
-export default function StripeMockCheckoutPage() {
+export default function StripeMockPage() {
   return (
-    <div className="min-h-screen bg-slate-50 dark:bg-slate-950 flex flex-col items-center justify-center p-4">
-      <div className="max-w-4xl w-full bg-white dark:bg-slate-900 rounded-[2.5rem] p-8 md:p-12 shadow-xl border border-slate-100 dark:border-slate-800 text-center relative overflow-hidden">
-        {/* Decorative background gradients */}
-        <div className="absolute -top-32 -left-32 w-64 h-64 bg-indigo-500/5 rounded-full blur-3xl"></div>
-        <div className="absolute -bottom-32 -right-32 w-64 h-64 bg-violet-500/5 rounded-full blur-3xl"></div>
-
-        <div className="max-w-3xl mx-auto space-y-8">
-          <div className="flex flex-col items-center gap-2 mb-2">
-            <div className="w-12 h-12 rounded-2xl bg-indigo-600 text-white flex items-center justify-center font-black text-xl shadow-lg shadow-indigo-500/20">
-              S
-            </div>
-            <h1 className="text-2xl font-black text-slate-850 dark:text-white tracking-tight">Stripe Checkout Simulation</h1>
-            <p className="text-xs text-slate-400 font-medium">Securely hosted by Stripe Mock Gateway</p>
-          </div>
-
-          <Suspense fallback={<div className="h-64 flex items-center justify-center text-slate-400 text-xs">Initializing mock gateway...</div>}>
-            <StripeMockDetails />
-          </Suspense>
-        </div>
+    <Suspense fallback={
+      <div className="min-h-screen bg-slate-950 flex items-center justify-center text-white">
+        <Loader className="w-8 h-8 animate-spin text-indigo-500" />
       </div>
-    </div>
+    }>
+      <StripeMockContent />
+    </Suspense>
   );
 }
