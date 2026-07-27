@@ -61,23 +61,30 @@ export class EmailService {
   }
 
   async sendPromotionalCampaign(emails: string[], subject: string, message: string) {
-    console.log(`[EmailService] Initiating promotional campaign dispatch to ${emails.length} recipient(s)...`);
-    try {
-      for (const email of emails) {
-        try {
-          await this.mailerService.sendMail({
-            to: email,
-            subject: subject,
-            html: message,
-          });
-          console.log(`[EmailService] Successfully delivered promotional email to ${email}`);
-        } catch (individualError: any) {
-          console.error(`[EmailService] Failed to send email to ${email}:`, individualError?.message || individualError);
-        }
+    console.log(`[EmailService] Dispatching campaign to ${emails.length} recipient(s):`, emails);
+    let successCount = 0;
+    let lastError: any = null;
+
+    for (const email of emails) {
+      try {
+        const info = await this.mailerService.sendMail({
+          to: email,
+          subject: subject,
+          html: message,
+        });
+        console.log(`[EmailService] Successfully sent email to ${email}. SMTP info:`, info?.response || info);
+        successCount++;
+      } catch (individualError: any) {
+        console.error(`[EmailService] Failed to send email to ${email}:`, individualError?.message || individualError);
+        lastError = individualError;
       }
-    } catch (error: any) {
-      console.error(`[EmailService] Outer SMTP send error:`, error?.message || error);
     }
+
+    if (successCount === 0 && lastError) {
+      throw new Error(`Email delivery failed: ${lastError.message || lastError}`);
+    }
+
+    console.log(`[EmailService] Campaign completed. ${successCount}/${emails.length} emails delivered.`);
   }
 
   async sendOrderConfirmation(email: string, name: string, orderData: any) {
