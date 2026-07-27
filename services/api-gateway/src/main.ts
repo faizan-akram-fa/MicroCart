@@ -7,9 +7,6 @@ import multer from 'multer';
 async function bootstrap() {
   const app = await NestFactory.create(AppModule);
 
-  // Parse any incoming multipart file streams into memory buffers for Gateway proxying
-  app.use(multer({ storage: multer.memoryStorage() }).any());
-
   // ── Prometheus Metrics Setup ────────────────────────────────────────────────
   const SERVICE_NAME = 'api-gateway';
   const metricsRegistry = new Registry();
