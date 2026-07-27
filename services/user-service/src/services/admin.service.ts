@@ -199,30 +199,37 @@ export class AdminService {
   }
 
   async sendPromotionalEmail(data: { target: string, subject: string, message: string }, adminId: string, adminEmail: string) {
-    let users = [];
-    
-    if (data.target === 'all') {
-      users = await this.userRepository.find({ select: ['email'] });
-    } else if (data.target === 'buyers') {
-      users = await this.userRepository.find({ where: { role: UserRole.BUYER }, select: ['email'] });
-    } else if (data.target === 'sellers') {
-      users = await this.userRepository.find({ where: { role: UserRole.SELLER }, select: ['email'] });
-    } else {
-      // If it's a specific email
-      users = [{ email: data.target }];
+    try {
+      let users = [];
+      
+      if (data.target === 'all') {
+        users = await this.userRepository.find({ select: ['email'] });
+      } else if (data.target === 'buyers') {
+        users = await this.userRepository.find({ where: { role: UserRole.BUYER }, select: ['email'] });
+      } else if (data.target === 'sellers') {
+        users = await this.userRepository.find({ where: { role: UserRole.SELLER }, select: ['email'] });
+      } else {
+        users = [{ email: data.target }];
+      }
+
+      const emailList = users.map(u => u.email).filter(e => !!e);
+      
+      if (emailList.length === 0) {
+        throw new BadRequestException('No recipients found for the selected target.');
+      }
+
+      await this.emailService.sendPromotionalCampaign(emailList, data.subject, data.message);
+
+      await this.logActivity(adminId, adminEmail, 'SEND_PROMOTIONAL_EMAIL', 'MULTIPLE', `Sent campaign "${data.subject}" to ${emailList.length} recipients`);
+
+      return { message: `Campaign dispatched successfully to ${emailList.length} recipient(s)!` };
+    } catch (error: any) {
+      console.error('[AdminService] sendPromotionalEmail error:', error?.message || error);
+      if (error instanceof BadRequestException || error instanceof ForbiddenException) {
+        throw error;
+      }
+      throw new BadRequestException(error?.message || 'Failed to dispatch campaign');
     }
-
-    const emailList = users.map(u => u.email).filter(e => !!e);
-    
-    if (emailList.length === 0) {
-      throw new BadRequestException('No recipients found for the selected target.');
-    }
-
-    await this.emailService.sendPromotionalCampaign(emailList, data.subject, data.message);
-
-    await this.logActivity(adminId, adminEmail, 'SEND_PROMOTIONAL_EMAIL', 'MULTIPLE', `Sent campaign "${data.subject}" to ${emailList.length} recipients`);
-
-    return { message: `Campaign sent successfully to ${emailList.length} recipients` };
   }
 
   async getSellerBuyersDetails(sellerId: string, token: string) {

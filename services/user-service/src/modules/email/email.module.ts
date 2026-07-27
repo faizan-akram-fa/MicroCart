@@ -62,25 +62,32 @@ class CustomHandlebarsAdapter implements TemplateAdapter {
     MailerModule.forRootAsync({
       imports: [ConfigModule],
       useFactory: async (config: ConfigService) => {
+        const smtpUser = config.get('SMTP_USER');
+        const smtpPass = config.get('SMTP_PASS');
         const port = parseInt(config.get('SMTP_PORT', '465'), 10);
         const secure = port === 465;
-        return {
-          transport: {
-            host: config.get('SMTP_HOST', 'smtp.gmail.com'),
-            port,
-            secure,
-            auth: {
-              user: config.get('SMTP_USER'),
-              pass: config.get('SMTP_PASS'),
-            },
-            tls: {
-              rejectUnauthorized: false, // Allow self-signed certs in dev
-            },
-            connectionTimeout: 10000, // 10 seconds to connect
-            greetingTimeout: 10000,   // 10 seconds to receive greeting
+        const transportConfig: any = {
+          host: config.get('SMTP_HOST', 'smtp.gmail.com'),
+          port,
+          secure,
+          tls: {
+            rejectUnauthorized: false, // Allow self-signed certs in dev
           },
+          connectionTimeout: 10000, // 10 seconds to connect
+          greetingTimeout: 10000,   // 10 seconds to receive greeting
+        };
+
+        if (smtpUser && smtpPass) {
+          transportConfig.auth = {
+            user: smtpUser,
+            pass: smtpPass,
+          };
+        }
+
+        return {
+          transport: transportConfig,
           defaults: {
-            from: `"MicroCart No-Reply" <${config.get('SMTP_USER')}>`,
+            from: `"MicroCart No-Reply" <${smtpUser || 'noreply@microcart.me'}>`,
           },
           template: {
             dir: join(__dirname, 'templates'),
