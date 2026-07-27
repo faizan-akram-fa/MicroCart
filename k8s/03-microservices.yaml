@@ -87,6 +87,8 @@ spec:
           envFrom:
             - configMapRef:
                 name: microcart-config
+            - secretRef:
+                name: microcart-secrets
           env:
             - name: PORT
               value: "3001"
