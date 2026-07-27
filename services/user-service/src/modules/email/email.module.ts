@@ -62,28 +62,28 @@ class CustomHandlebarsAdapter implements TemplateAdapter {
     MailerModule.forRootAsync({
       imports: [ConfigModule],
       useFactory: async (config: ConfigService) => {
+        const host = config.get('SMTP_HOST', 'smtp.gmail.com');
+        const port = parseInt(config.get('SMTP_PORT', '465'), 10);
         const smtpUser = config.get('SMTP_USER')?.trim();
         let smtpPass = config.get('SMTP_PASS');
         if (smtpPass) {
           smtpPass = smtpPass.trim().replace(/\s+/g, '');
         }
-        const port = parseInt(config.get('SMTP_PORT', '587'), 10);
-        const secure = port === 465;
-        const transportConfig: any = {
-          host: config.get('SMTP_HOST', 'smtp.gmail.com'),
-          port,
-          secure,
-          tls: {
-            rejectUnauthorized: false, // Allow self-signed certs in dev
-          },
-          connectionTimeout: 15000, // 15 seconds to connect
-          greetingTimeout: 15000,   // 15 seconds to receive greeting
-        };
 
-        if (smtpUser && smtpPass) {
-          transportConfig.auth = {
-            user: smtpUser,
-            pass: smtpPass,
+        let transportConfig: any;
+
+        if (host.includes('gmail')) {
+          transportConfig = {
+            service: 'gmail',
+            auth: (smtpUser && smtpPass) ? { user: smtpUser, pass: smtpPass } : undefined,
+          };
+        } else {
+          transportConfig = {
+            host,
+            port,
+            secure: port === 465,
+            auth: (smtpUser && smtpPass) ? { user: smtpUser, pass: smtpPass } : undefined,
+            tls: { rejectUnauthorized: false },
           };
         }
 

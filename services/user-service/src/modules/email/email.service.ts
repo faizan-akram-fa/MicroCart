@@ -63,19 +63,14 @@ export class EmailService {
   async sendPromotionalCampaign(emails: string[], subject: string, message: string) {
     console.log(`[EmailService] Initiating promotional campaign dispatch to ${emails.length} recipient(s)...`);
     try {
-      // Loop over recipients to ensure individual delivery
       for (const email of emails) {
         try {
           await this.mailerService.sendMail({
             to: email,
             subject: subject,
-            template: './promotional',
-            context: {
-              subject,
-              message,
-            },
+            html: message,
           });
-          console.log(`[EmailService] Successfully sent promotional email to ${email}`);
+          console.log(`[EmailService] Successfully delivered promotional email to ${email}`);
         } catch (individualError: any) {
           console.error(`[EmailService] Failed to send email to ${email}:`, individualError?.message || individualError);
         }
