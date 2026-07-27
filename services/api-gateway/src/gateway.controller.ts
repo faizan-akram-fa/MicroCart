@@ -75,6 +75,11 @@ export class GatewayController {
     return this.proxy('user', req, res);
   }
 
+  @All('app/uploads*')
+  async proxyAppUploads(@Req() req: Request, @Res() res: Response) {
+    return this.proxy('user', req, res);
+  }
+
   private async proxy(
     service: 'user' | 'product' | 'cart' | 'order' | 'wishlist' | 'support',
     req: Request,
