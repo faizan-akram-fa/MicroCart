@@ -61,23 +61,27 @@ export class EmailService {
   }
 
   async sendPromotionalCampaign(emails: string[], subject: string, message: string) {
-    // Send in bulk using BCC to protect privacy
+    console.log(`[EmailService] Initiating promotional campaign dispatch to ${emails.length} recipient(s)...`);
     try {
-      const primaryRecipient = emails[0] || 'support@microcart.me';
-      await this.mailerService.sendMail({
-        to: primaryRecipient,
-        bcc: emails.length > 1 ? emails.slice(1) : undefined,
-        subject: subject,
-        template: './promotional',
-        context: {
-          subject,
-          message,
-        },
-      });
-      console.log(`Promotional email campaign sent to ${emails.length} recipients.`);
+      // Loop over recipients to ensure individual delivery
+      for (const email of emails) {
+        try {
+          await this.mailerService.sendMail({
+            to: email,
+            subject: subject,
+            template: './promotional',
+            context: {
+              subject,
+              message,
+            },
+          });
+          console.log(`[EmailService] Successfully sent promotional email to ${email}`);
+        } catch (individualError: any) {
+          console.error(`[EmailService] Failed to send email to ${email}:`, individualError?.message || individualError);
+        }
+      }
     } catch (error: any) {
-      console.warn(`[EmailService] SMTP send note (${error.message || error}). Campaign recorded for ${emails.length} recipients.`);
-      // Do not throw 500 error so admin campaign dispatch succeeds smoothly
+      console.error(`[EmailService] Outer SMTP send error:`, error?.message || error);
     }
   }
 
