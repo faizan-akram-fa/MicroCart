@@ -546,8 +546,10 @@ export class OrderService {
     const frontendUrl = this.configService.get<string>('FRONTEND_URL') || 'https://microcart.me';
     const exchangeRate = this.configService.get<number>('STRIPE_CURRENCY_CONVERSION_RATE', 278);
 
-    if (!stripeSecretKey) {
-      console.warn('STRIPE_SECRET_KEY is missing in .env. Running in Mock Mode.');
+    console.log(`[OrderService] Stripe Key Check: ${stripeSecretKey ? `FOUND (${stripeSecretKey.substring(0, 7)}...)` : 'MISSING / EMPTY'}`);
+
+    if (!stripeSecretKey || stripeSecretKey.trim() === '') {
+      console.warn('[OrderService] STRIPE_SECRET_KEY is missing/empty. Running in Mock Mode.');
       return {
         id: `cs_mock_${Math.floor(100000 + Math.random() * 900000)}`,
         url: `${frontendUrl}/checkout/stripe-mock?order_id=${orderId}&amount=${amount}`,
