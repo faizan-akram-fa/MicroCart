@@ -4,7 +4,7 @@ import { useState, useEffect } from 'react';
 import Link from 'next/link';
 import { wishlistAPI } from '@/lib/api';
 import { useAuthStore, useAppStore, SUPPORTED_CURRENCIES, SUPPORTED_LANGUAGES, CURRENCY_LABELS } from '@/lib/store';
-import { ShoppingCart, Heart, User, LogOut, Package, Moon, Sun, ShieldCheck, Globe, DollarSign, Headphones } from 'lucide-react';
+import { ShoppingCart, Heart, User, LogOut, Package, Moon, Sun, ShieldCheck, Globe, DollarSign, Headphones, Menu, X } from 'lucide-react';
 import { useRouter } from 'next/navigation';
 import ProfileImage from './ProfileImage';
 import { useCartStore } from '@/hooks/useCartStore';
@@ -17,6 +17,7 @@ export default function Header() {
   const { theme, toggleTheme } = useTheme();
   const router = useRouter();
   const [mounted, setMounted] = useState(false);
+  const [isMobileMenuOpen, setIsMobileMenuOpen] = useState(false);
 
   const getSupportLink = () => {
     if (!isAuthenticated) return '/support';
@@ -275,24 +276,108 @@ export default function Header() {
                     Logout
                   </span>
                 </button>
-                <span className="text-sm font-medium text-gray-700 dark:text-gray-200">
+                <span className="hidden sm:inline text-sm font-medium text-gray-700 dark:text-gray-200">
                   {user?.firstName}
                 </span>
               </>
               )
             ) : (
               <>
-                <Link href="/login" className="btn btn-outline">
+                <Link href="/login" className="btn btn-outline text-xs px-3 py-1.5 sm:text-sm sm:px-5 sm:py-2.5">
                   Login
                 </Link>
-                <Link href="/register" className="btn btn-primary">
+                <Link href="/register" className="btn btn-primary text-xs px-3 py-1.5 sm:text-sm sm:px-5 sm:py-2.5">
                   Register
                 </Link>
               </>
             )}
+
+            {/* Mobile Hamburger Toggle Button */}
+            <button
+              onClick={() => setIsMobileMenuOpen(!isMobileMenuOpen)}
+              className="md:hidden p-2 rounded-lg text-gray-700 hover:text-primary-600 dark:text-gray-200 focus:outline-none"
+              aria-label="Toggle Mobile Navigation"
+            >
+              {isMobileMenuOpen ? <X className="w-6 h-6" /> : <Menu className="w-6 h-6" />}
+            </button>
           </div>
         </div>
       </div>
+
+      {/* Mobile Drawer Menu */}
+      {isMobileMenuOpen && (
+        <div className="md:hidden bg-white dark:bg-gray-900 border-b border-gray-200 dark:border-gray-800 px-4 pt-3 pb-6 space-y-4 animate-fade-in">
+          <nav className="flex flex-col space-y-2">
+            <Link
+              href="/"
+              onClick={() => setIsMobileMenuOpen(false)}
+              className="px-4 py-2.5 rounded-xl font-semibold text-gray-700 dark:text-gray-200 hover:bg-gray-100 dark:hover:bg-gray-800 transition-all flex items-center justify-between"
+            >
+              <span>Products</span>
+            </Link>
+
+            {mounted && isAuthenticated && user?.role === 'seller' && (
+              <Link
+                href="/seller/dashboard"
+                onClick={() => setIsMobileMenuOpen(false)}
+                className="px-4 py-2.5 rounded-xl font-semibold text-primary-600 dark:text-primary-400 hover:bg-primary-50 dark:hover:bg-primary-950/40 transition-all"
+              >
+                Seller Dashboard
+              </Link>
+            )}
+
+            {mounted && isAuthenticated && (user?.role === 'admin' || user?.role === 'sub_admin') && (
+              <Link
+                href="/admin/dashboard"
+                onClick={() => setIsMobileMenuOpen(false)}
+                className="px-4 py-2.5 rounded-xl font-semibold text-indigo-600 dark:text-indigo-400 hover:bg-indigo-50 dark:hover:bg-indigo-950/40 transition-all flex items-center gap-2"
+              >
+                <ShieldCheck className="w-4 h-4" />
+                Admin Panel
+              </Link>
+            )}
+
+            {mounted && isAuthenticated && user?.role === 'buyer' && (
+              <>
+                <Link
+                  href="/wishlist"
+                  onClick={() => setIsMobileMenuOpen(false)}
+                  className="px-4 py-2.5 rounded-xl font-semibold text-gray-700 dark:text-gray-200 hover:bg-gray-100 dark:hover:bg-gray-800 transition-all flex items-center justify-between"
+                >
+                  <span className="flex items-center gap-2"><Heart className="w-4 h-4 text-rose-500" /> Wishlist</span>
+                </Link>
+                <Link
+                  href="/cart"
+                  onClick={() => setIsMobileMenuOpen(false)}
+                  className="px-4 py-2.5 rounded-xl font-semibold text-gray-700 dark:text-gray-200 hover:bg-gray-100 dark:hover:bg-gray-800 transition-all flex items-center justify-between"
+                >
+                  <span className="flex items-center gap-2"><ShoppingCart className="w-4 h-4 text-primary-500" /> Cart</span>
+                  {itemCount > 0 && (
+                    <span className="bg-red-600 text-white text-xs font-bold px-2 py-0.5 rounded-full">
+                      {itemCount}
+                    </span>
+                  )}
+                </Link>
+                <Link
+                  href="/orders"
+                  onClick={() => setIsMobileMenuOpen(false)}
+                  className="px-4 py-2.5 rounded-xl font-semibold text-gray-700 dark:text-gray-200 hover:bg-gray-100 dark:hover:bg-gray-800 transition-all flex items-center justify-between"
+                >
+                  <span className="flex items-center gap-2"><Package className="w-4 h-4 text-amber-500" /> Orders</span>
+                </Link>
+              </>
+            )}
+
+            <Link
+              href={getSupportLink()}
+              onClick={() => setIsMobileMenuOpen(false)}
+              className="px-4 py-2.5 rounded-xl font-semibold text-gray-700 dark:text-gray-200 hover:bg-gray-100 dark:hover:bg-gray-800 transition-all flex items-center gap-2"
+            >
+              <Headphones className="w-4 h-4 text-emerald-500" /> Support Center
+            </Link>
+          </nav>
+        </div>
+      )}
     </header>
   );
 }
