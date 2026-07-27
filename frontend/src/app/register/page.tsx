@@ -76,6 +76,26 @@ export default function RegisterPage() {
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
 
+    if (!formData.firstName.trim()) {
+      toast.error('First Name is required');
+      return;
+    }
+
+    if (!formData.lastName.trim()) {
+      toast.error('Last Name is required');
+      return;
+    }
+
+    if (!formData.email.trim()) {
+      toast.error('Email address is required');
+      return;
+    }
+
+    if (!formData.password) {
+      toast.error('Password is required');
+      return;
+    }
+
     if (formData.password !== formData.confirmPassword) {
       toast.error('Passwords do not match');
       return;
@@ -99,17 +119,29 @@ export default function RegisterPage() {
     }
 
     // Phone validation: +92 followed by 10 digits
-    // Since we control input to be digits only and prepend +92, checking length is mostly enough but regex is safer
     const phoneRegex = /^\+92\d{10}$/;
-
     if (formData.phone && !phoneRegex.test(formData.phone)) {
       toast.error('Phone number must be exactly 10 digits after +92');
       return;
     }
 
-    if (formData.role === 'seller' && !cnicFile) {
-      toast.error('CNIC Document is required for sellers');
-      return;
+    if (formData.role === 'seller') {
+      if (!formData.storeName.trim()) {
+        toast.error('Store Name is required for sellers');
+        return;
+      }
+      if (!formData.storeAddress.trim()) {
+        toast.error('Store Address is required for sellers');
+        return;
+      }
+      if (!formData.cnicNumber.trim()) {
+        toast.error('CNIC Number is required for sellers');
+        return;
+      }
+      if (!cnicFile) {
+        toast.error('CNIC Document (Image/PDF) is required for sellers');
+        return;
+      }
     }
 
     setLoading(true);
@@ -148,7 +180,12 @@ export default function RegisterPage() {
         router.push('/');
       }
     } catch (error: any) {
-      toast.error(error.response?.data?.message || 'Registration failed');
+      const serverMsg = error.response?.data?.message;
+      if (Array.isArray(serverMsg)) {
+        toast.error(serverMsg.join(' • '));
+      } else {
+        toast.error(serverMsg || 'Registration failed');
+      }
     } finally {
       setLoading(false);
     }
