@@ -178,6 +178,90 @@ data:
         options:
           path: /etc/grafana/provisioning/dashboards
           foldersFromFilesStructure: false
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: grafana-dashboard-json
+  namespace: microcart
+data:
+  microcart-dashboard.json: |
+    {
+      "annotations": { "list": [] },
+      "editable": true,
+      "fiscalYearStartMonth": 0,
+      "graphTooltip": 1,
+      "id": null,
+      "links": [],
+      "liveNow": true,
+      "panels": [
+        {
+          "title": "System Request Rate (RPS by Service)",
+          "type": "timeseries",
+          "gridPos": { "h": 8, "w": 12, "x": 0, "y": 0 },
+          "targets": [
+            {
+              "expr": "sum(rate(http_requests_total[1m])) by (service)",
+              "legendFormat": "{{service}}",
+              "datasource": { "type": "prometheus", "uid": "prometheus-ds" }
+            }
+          ]
+        },
+        {
+          "title": "HTTP 5xx Server Errors (Rate)",
+          "type": "stat",
+          "gridPos": { "h": 8, "w": 12, "x": 12, "y": 0 },
+          "targets": [
+            {
+              "expr": "sum(rate(http_requests_total{status_code=~\"5..\"}[1m]))",
+              "legendFormat": "5xx Errors",
+              "datasource": { "type": "prometheus", "uid": "prometheus-ds" }
+            }
+          ]
+        },
+        {
+          "title": "Request Duration / Latency (Average ms)",
+          "type": "timeseries",
+          "gridPos": { "h": 8, "w": 12, "x": 0, "y": 8 },
+          "targets": [
+            {
+              "expr": "sum(rate(http_request_duration_ms_sum[1m])) by (service) / sum(rate(http_request_duration_ms_count[1m])) by (service)",
+              "legendFormat": "{{service}} (avg ms)",
+              "datasource": { "type": "prometheus", "uid": "prometheus-ds" }
+            }
+          ]
+        },
+        {
+          "title": "HTTP Status Code Distribution",
+          "type": "piechart",
+          "gridPos": { "h": 8, "w": 12, "x": 12, "y": 8 },
+          "targets": [
+            {
+              "expr": "sum(http_requests_total) by (status_code)",
+              "legendFormat": "HTTP {{status_code}}",
+              "datasource": { "type": "prometheus", "uid": "prometheus-ds" }
+            }
+          ]
+        },
+        {
+          "title": "Live Container & Application Logs",
+          "type": "logs",
+          "gridPos": { "h": 10, "w": 24, "x": 0, "y": 16 },
+          "targets": [
+            {
+              "expr": "{namespace=\"microcart\"}",
+              "datasource": { "type": "loki", "uid": "loki-ds" }
+            }
+          ]
+        }
+      ],
+      "refresh": "5s",
+      "schemaVersion": 38,
+      "style": "dark",
+      "tags": ["microcart", "monitoring"],
+      "time": { "from": "now-30m", "to": "now" },
+      "title": "MicroCart Live Microservices Dashboard",
+      "uid": "microcart-monitoring"
+    }
 ---
 
 # --- 4. GRAFANA DEPLOYMENT & SERVICE ---
@@ -225,6 +309,9 @@ spec:
             - name: dashboards-provider-volume
               mountPath: /etc/grafana/provisioning/dashboards/dashboards.yml
               subPath: dashboards.yml
+            - name: dashboard-json-volume
+              mountPath: /etc/grafana/provisioning/dashboards/microcart-dashboard.json
+              subPath: microcart-dashboard.json
       volumes:
         - name: datasources-volume
           configMap:
@@ -232,6 +319,9 @@ spec:
         - name: dashboards-provider-volume
           configMap:
             name: grafana-dashboards-provider
+        - name: dashboard-json-volume
+          configMap:
+            name: grafana-dashboard-json
 ---
 apiVersion: v1
 kind: Service
