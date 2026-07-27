@@ -243,12 +243,100 @@ data:
           ]
         },
         {
-          "title": "Live Container & Application Logs",
+          "title": "API Gateway - Live Runtime Logs",
           "type": "logs",
-          "gridPos": { "h": 10, "w": 24, "x": 0, "y": 16 },
+          "gridPos": { "h": 8, "w": 12, "x": 0, "y": 16 },
           "targets": [
             {
-              "expr": "{job=\"varlogs\"}",
+              "expr": "{filename=~\".*api-gateway.*\"}",
+              "datasource": { "type": "loki", "uid": "loki-ds" }
+            }
+          ]
+        },
+        {
+          "title": "User Service - Live Runtime Logs",
+          "type": "logs",
+          "gridPos": { "h": 8, "w": 12, "x": 12, "y": 16 },
+          "targets": [
+            {
+              "expr": "{filename=~\".*user-service.*\"}",
+              "datasource": { "type": "loki", "uid": "loki-ds" }
+            }
+          ]
+        },
+        {
+          "title": "Product Service - Live Runtime Logs",
+          "type": "logs",
+          "gridPos": { "h": 8, "w": 12, "x": 0, "y": 24 },
+          "targets": [
+            {
+              "expr": "{filename=~\".*product-service.*\"}",
+              "datasource": { "type": "loki", "uid": "loki-ds" }
+            }
+          ]
+        },
+        {
+          "title": "Order Service - Live Runtime Logs",
+          "type": "logs",
+          "gridPos": { "h": 8, "w": 12, "x": 12, "y": 24 },
+          "targets": [
+            {
+              "expr": "{filename=~\".*order-service.*\"}",
+              "datasource": { "type": "loki", "uid": "loki-ds" }
+            }
+          ]
+        },
+        {
+          "title": "Cart Service - Live Runtime Logs",
+          "type": "logs",
+          "gridPos": { "h": 8, "w": 12, "x": 0, "y": 32 },
+          "targets": [
+            {
+              "expr": "{filename=~\".*cart-service.*\"}",
+              "datasource": { "type": "loki", "uid": "loki-ds" }
+            }
+          ]
+        },
+        {
+          "title": "Wishlist Service - Live Runtime Logs",
+          "type": "logs",
+          "gridPos": { "h": 8, "w": 12, "x": 12, "y": 32 },
+          "targets": [
+            {
+              "expr": "{filename=~\".*wishlist-service.*\"}",
+              "datasource": { "type": "loki", "uid": "loki-ds" }
+            }
+          ]
+        },
+        {
+          "title": "Support Service - Live Runtime Logs",
+          "type": "logs",
+          "gridPos": { "h": 8, "w": 12, "x": 0, "y": 40 },
+          "targets": [
+            {
+              "expr": "{filename=~\".*support-service.*\"}",
+              "datasource": { "type": "loki", "uid": "loki-ds" }
+            }
+          ]
+        },
+        {
+          "title": "Frontend - Live Runtime Logs",
+          "type": "logs",
+          "gridPos": { "h": 8, "w": 12, "x": 12, "y": 40 },
+          "targets": [
+            {
+              "expr": "{filename=~\".*frontend.*\"}",
+              "datasource": { "type": "loki", "uid": "loki-ds" }
+            }
+          ]
+        },
+        {
+          "title": "Unified System-Wide Application Logs",
+          "type": "logs",
+          "gridPos": { "h": 10, "w": 24, "x": 0, "y": 48 },
+          "targets": [
+            {
+              "expr": "{filename=~\".+\"}",
               "datasource": { "type": "loki", "uid": "loki-ds" }
             }
           ]
