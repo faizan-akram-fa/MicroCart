@@ -96,6 +96,9 @@ export default function SellerApprovals() {
     if (url.startsWith('http://') || url.startsWith('https://')) {
       return url;
     }
+    
+    // Normalize /app/uploads or app/uploads to uploads/
+    url = url.replace(/^\/?app\/uploads\//, 'uploads/').replace(/\/app\/uploads\//, '/uploads/');
     const cleanPath = url.startsWith('/') ? url : `/${url}`;
     return `/api${cleanPath}`;
   };

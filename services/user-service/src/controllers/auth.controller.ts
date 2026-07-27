@@ -36,7 +36,8 @@ export class AuthController {
       throw new BadRequestException('CNIC Document (Image/PDF) is required for sellers');
     }
     if (file) {
-      registerDto.cnicImage = file.path.replace(/\\/g, '/');
+      const filename = file.filename || file.path.replace(/\\/g, '/').split('/').pop();
+      registerDto.cnicImage = `uploads/${filename}`;
     }
     return this.authService.register(registerDto);
   }
