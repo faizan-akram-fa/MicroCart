@@ -7,6 +7,19 @@ import multer from 'multer';
 async function bootstrap() {
   const app = await NestFactory.create(AppModule);
 
+  // Parse incoming multipart file streams into memory buffers only for multipart requests
+  const memoryUpload = multer({ storage: multer.memoryStorage() }).any();
+  app.use((req: any, res: any, next: any) => {
+    if (req.path === '/api/health' || req.path === '/health' || req.path === '/metrics') {
+      return next();
+    }
+    const contentType = req.headers['content-type'] || req.headers['Content-Type'] || '';
+    if (contentType.toString().toLowerCase().includes('multipart/form-data')) {
+      return memoryUpload(req, res, next);
+    }
+    next();
+  });
+
   // ── Prometheus Metrics Setup ────────────────────────────────────────────────
   const SERVICE_NAME = 'api-gateway';
   const metricsRegistry = new Registry();
