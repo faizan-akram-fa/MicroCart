@@ -67,9 +67,9 @@ export class UserController {
       },
     }),
   }))
-  async uploadCnicImage(@Req() req) {
-    const file = req.file || (req.files && req.files.length > 0 ? req.files[0] : null);
-    console.log('[UserController] uploadCnicImage hit. Found file:', file ? file.filename : 'NULL', 'req.files length:', req.files?.length);
+  async uploadCnicImage(@Req() req, @UploadedFiles() files?: Express.Multer.File[], @UploadedFile() singleFile?: Express.Multer.File) {
+    const file = singleFile || (files && files.length > 0 ? files[0] : null) || req.file || (req.files && req.files.length > 0 ? req.files[0] : null);
+    console.log('[UserController] uploadCnicImage hit. Found file:', file ? file.filename : 'NULL', 'files count:', files?.length);
     if (!file) {
       throw new BadRequestException('CNIC Document upload failed. Please upload a valid JPG, PNG, or PDF file.');
     }

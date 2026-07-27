@@ -48,7 +48,8 @@ export class ProxyService {
       }
 
       const isMultipart = cleanHeaders['content-type']?.toLowerCase().includes('multipart/form-data');
-      const files = reqStream?.files || (reqStream as any)?.files;
+      const files = (reqStream?.files || (reqStream as any)?.files) ||
+                    (reqStream?.file ? [reqStream.file] : (reqStream as any)?.file ? [(reqStream as any).file] : []);
 
       // Rebuild FormData for multipart requests (guarantees clean binary file buffers + boundary parameters + Content-Length)
       if (isMultipart) {

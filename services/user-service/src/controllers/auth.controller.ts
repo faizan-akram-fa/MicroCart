@@ -1,5 +1,5 @@
-import { Controller, Post, Body, Get, UseGuards, Req, Res, UseInterceptors, UploadedFile, BadRequestException } from '@nestjs/common';
-import { FileInterceptor } from '@nestjs/platform-express';
+import { Controller, Post, Body, Get, UseGuards, Req, Res, UseInterceptors, UploadedFile, UploadedFiles, BadRequestException } from '@nestjs/common';
+import { FileInterceptor, AnyFilesInterceptor } from '@nestjs/platform-express';
 import { diskStorage } from 'multer';
 import { extname, join } from 'path';
 import * as fs from 'fs';
@@ -13,7 +13,7 @@ export class AuthController {
   constructor(private authService: AuthService) { }
 
   @Post('register')
-  @UseInterceptors(FileInterceptor('cnicImage', {
+  @UseInterceptors(AnyFilesInterceptor({
     storage: diskStorage({
       destination: (req, file, cb) => {
         const uploadDir = join(process.cwd(), 'uploads');
@@ -29,11 +29,11 @@ export class AuthController {
       },
     }),
   }))
-  async register(@Req() req, @Body() registerDto: RegisterDto, @UploadedFile() singleFile: Express.Multer.File) {
-    const file = singleFile || req.file || (req.files && req.files.length > 0 ? req.files[0] : null);
+  async register(@Req() req, @Body() registerDto: RegisterDto, @UploadedFiles() files: Express.Multer.File[]) {
+    const file = (files && files.length > 0 ? files[0] : null) || req.file || (req.files && req.files.length > 0 ? req.files[0] : null);
     console.log('[AuthController] Register request role:', registerDto.role, 'File received:', file ? file.filename : 'NO FILE');
     if (registerDto.role === 'seller' && !file && !registerDto.cnicImage) {
-      throw new BadRequestException('CNIC Image/PDF is required for sellers');
+      throw new BadRequestException('CNIC Document (Image/PDF) is required for sellers');
     }
     if (file) {
       registerDto.cnicImage = file.path.replace(/\\/g, '/');
