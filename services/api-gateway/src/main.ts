@@ -2,7 +2,7 @@ import { NestFactory } from '@nestjs/core';
 import { AppModule } from './app.module';
 import rateLimit from 'express-rate-limit';
 import { Registry, Counter, Histogram, collectDefaultMetrics } from 'prom-client';
-import multer from 'multer';
+import * as multer from 'multer';
 
 async function bootstrap() {
   const app = await NestFactory.create(AppModule);
