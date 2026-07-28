@@ -23,10 +23,20 @@ const CATEGORIES = [
   'Other'
 ];
 
+const formatImageUrl = (url: string) => {
+  if (!url) return '';
+  let clean = url.replace(/^https?:\/\/(localhost|product-service|user-service)(:\d+)?/, '');
+  if (clean.startsWith('http://') || clean.startsWith('https://')) return clean;
+  clean = clean.replace(/^\/?app\/uploads\//, 'uploads/').replace(/\/app\/uploads\//, '/uploads/');
+  const cleanPath = clean.startsWith('/') ? clean : `/${clean}`;
+  return cleanPath.startsWith('/api') ? cleanPath : `/api${cleanPath}`;
+};
+
 function SellerProductImage({ src, alt }: { src: string; alt: string }) {
   const [hasError, setHasError] = useState(false);
+  const formattedSrc = formatImageUrl(src);
 
-  if (hasError || !src) {
+  if (hasError || !formattedSrc) {
     return (
       <div className="w-full h-full flex flex-col items-center justify-center bg-gray-100 dark:bg-gray-800 text-gray-400 p-4 select-none">
         <Package className="w-10 h-10 mb-1 opacity-50 text-gray-400 dark:text-gray-500" />
@@ -37,7 +47,7 @@ function SellerProductImage({ src, alt }: { src: string; alt: string }) {
 
   return (
     <img
-      src={src}
+      src={formattedSrc}
       alt={alt}
       className="w-full h-full object-cover rounded"
       onError={() => setHasError(true)}
@@ -837,12 +847,20 @@ export default function SellerProductsPage() {
                   {(existingImages.length > 0 || newFiles.length > 0) && (
                     <div className="grid grid-cols-4 sm:grid-cols-5 gap-3 mt-4">
                       {existingImages.map((img, idx) => (
-                        <div key={`existing-${idx}`} className="relative group aspect-square rounded-lg overflow-hidden border border-gray-200">
-                          <img src={img} alt="Product" className="w-full h-full object-cover" />
+                        <div key={`existing-${idx}`} className="relative group aspect-square rounded-lg overflow-hidden border border-gray-200 bg-gray-100 dark:bg-gray-800">
+                          <img 
+                            src={formatImageUrl(img)} 
+                            alt="Product" 
+                            className="w-full h-full object-cover" 
+                            onError={(e) => {
+                              (e.target as HTMLImageElement).src = 'https://images.unsplash.com/photo-1523275335684-37898b6baf30?w=300';
+                            }}
+                          />
                           <button
                             type="button"
                             onClick={() => removeExistingImage(idx)}
-                            className="absolute top-1 right-1 bg-red-500 text-white rounded-full p-1 opacity-0 group-hover:opacity-100 transition-opacity"
+                            className="absolute top-1 right-1 bg-red-600 text-white rounded-full p-1 shadow-md hover:bg-red-700 transition-colors z-10"
+                            title="Remove picture"
                           >
                             <X className="w-3 h-3" />
                           </button>
