@@ -21,6 +21,28 @@ import { useAppStore } from '@/lib/store';
 import { formatPrice } from '@/lib/currency';
 import toast, { Toaster } from 'react-hot-toast';
 
+function ProductImageWithFallback({ src, alt }: { src: string; alt: string }) {
+  const [hasError, setHasError] = useState(false);
+
+  if (hasError || !src) {
+    return (
+      <div className="w-full h-full flex flex-col items-center justify-center bg-gray-100 dark:bg-gray-800/80 text-gray-400 p-4 select-none">
+        <Package className="w-10 h-10 mb-1.5 opacity-50 text-gray-400 dark:text-gray-500" />
+        <span className="text-[10px] font-bold uppercase tracking-widest text-gray-400 dark:text-gray-500">No Image Preview</span>
+      </div>
+    );
+  }
+
+  return (
+    <img 
+      src={src} 
+      alt={alt} 
+      className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-500" 
+      onError={() => setHasError(true)}
+    />
+  );
+}
+
 export default function InventoryOversight() {
   const [products, setProducts] = useState<any[]>([]);
   const [loading, setLoading] = useState(true);
@@ -304,16 +326,10 @@ export default function InventoryOversight() {
               >
                 {/* Product Image Header */}
                 <div className="relative h-44 bg-gray-50 dark:bg-gray-800/60 overflow-hidden flex items-center justify-center">
-                  {itemImg ? (
-                    <img 
-                      src={getImageUrl(itemImg)} 
-                      alt={product.name} 
-                      className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-500" 
-                      onError={(e) => { (e.target as HTMLElement).style.display = 'none'; }}
-                    />
-                  ) : (
-                    <Package className="w-10 h-10 text-gray-300 dark:text-gray-700" />
-                  )}
+                  <ProductImageWithFallback
+                    src={getImageUrl(itemImg)}
+                    alt={product.name}
+                  />
 
                   {/* Stock Status Tag Badge */}
                   <div className="absolute top-3 right-3">
