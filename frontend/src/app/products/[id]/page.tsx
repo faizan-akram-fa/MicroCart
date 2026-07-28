@@ -5,7 +5,8 @@ import Link from 'next/link';
 import { useState, useEffect } from 'react';
 import { useParams, useRouter } from 'next/navigation';
 import { productsAPI, cartAPI, wishlistAPI } from '@/lib/api';
-import { useAuthStore } from '@/lib/store';
+import { useAuthStore, useAppStore } from '@/lib/store';
+import { formatPrice } from '@/lib/currency';
 import { Product } from '@/types';
 import toast from 'react-hot-toast';
 import { Star, ShoppingCart, Heart, ArrowLeft, Minus, Plus, Share2, MessageSquare, Package } from 'lucide-react';
@@ -38,6 +39,7 @@ export default function ProductDetailPage() {
     const params = useParams();
     const router = useRouter();
     const { isAuthenticated, user, wishlist, addToWishlistStore, removeFromWishlistStore } = useAuthStore();
+    const { currency, exchangeRates } = useAppStore();
     const { increment, fetchCartCount } = useCartStore();
 
     const [product, setProduct] = useState<Product | null>(null);
@@ -259,18 +261,18 @@ export default function ProductDetailPage() {
                     {product.salePrice && product.salePrice < product.price ? (
                         <div className="flex items-center gap-4 mb-8">
                             <span className="text-xl font-bold text-gray-500 line-through dark:text-gray-400">
-                                Rs {Number(product.price).toFixed(2)}
+                                {formatPrice(product.price, currency, exchangeRates)}
                             </span>
                             <span className="text-4xl font-bold text-red-600 dark:text-red-400">
-                                Rs {Number(product.salePrice).toFixed(2)}
+                                {formatPrice(product.salePrice, currency, exchangeRates)}
                             </span>
-                            <span className="bg-red-100 text-red-800 text-xs font-semibold mr-2 px-2.5 py-0.5 rounded dark:bg-red-200 dark:text-red-900">
-                                Save Rs {Number(Number(product.price) - Number(product.salePrice)).toFixed(0)}
+                            <span className="bg-red-100 text-red-800 text-xs font-semibold mr-2 px-2.5 py-0.5 rounded dark:bg-red-900/40 dark:text-red-300">
+                                Save {formatPrice(Number(product.price) - Number(product.salePrice), currency, exchangeRates)}
                             </span>
                         </div>
                     ) : (
-                        <div className="text-4xl font-bold text-gray-900 mb-8">
-                            Rs {Number(product.price).toFixed(2)}
+                        <div className="text-4xl font-bold text-gray-900 dark:text-white mb-8">
+                            {formatPrice(product.price, currency, exchangeRates)}
                         </div>
                     )}
 

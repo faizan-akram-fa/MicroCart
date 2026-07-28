@@ -507,17 +507,17 @@ export default function SellerProductsPage() {
                       <span className="text-sm font-medium text-gray-400 line-through">
                         Rs {Number(product.price).toFixed(2)}
                       </span>
-                      <span className="text-xl font-bold text-red-600">
+                      <span className="text-xl font-bold text-red-600 dark:text-red-400">
                         Rs {Number(product.salePrice).toFixed(2)}
                       </span>
                     </>
                   ) : (
-                    <span className="text-xl font-bold text-primary-600">
+                    <span className="text-xl font-bold text-primary-600 dark:text-primary-400">
                       Rs {Number(product.price).toFixed(2)}
                     </span>
                   )}
                 </div>
-                <span className={`text-sm font-medium ${product.stock > 0 ? 'text-green-600' : 'text-red-500'}`}>
+                <span className={`text-sm font-medium ${product.stock > 0 ? 'text-green-600 dark:text-green-400' : 'text-red-500 dark:text-red-400'}`}>
                   {product.stock} In Stock
                 </span>
               </div>
