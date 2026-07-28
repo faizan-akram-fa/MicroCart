@@ -25,8 +25,10 @@ const CATEGORIES = [
 
 const formatImageUrl = (url: string) => {
   if (!url) return '';
-  let clean = url.replace(/^https?:\/\/(localhost|product-service|user-service)(:\d+)?/, '');
-  if (clean.startsWith('http://') || clean.startsWith('https://')) return clean;
+  if (url.includes('images.unsplash.com') || url.includes('placeholder.com') || url.includes('cloudfront.net')) {
+    return url;
+  }
+  let clean = url.replace(/^https?:\/\/[^\/]+/, '');
   clean = clean.replace(/^\/?app\/uploads\//, 'uploads/').replace(/\/app\/uploads\//, '/uploads/');
   const cleanPath = clean.startsWith('/') ? clean : `/${clean}`;
   return cleanPath.startsWith('/api') ? cleanPath : `/api${cleanPath}`;
@@ -475,7 +477,7 @@ export default function SellerProductsPage() {
         <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
           {products.map((product) => (
             <div key={product.id} className="card">
-              <div className="relative h-48 bg-gray-200 rounded mb-4 overflow-hidden">
+              <div className="relative h-48 bg-gray-100 dark:bg-gray-800 rounded mb-4 overflow-hidden">
                 <SellerProductImage
                   src={product.images?.[0] || ''}
                   alt={product.name}

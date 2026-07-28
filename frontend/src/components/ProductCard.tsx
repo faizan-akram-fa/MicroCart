@@ -98,8 +98,10 @@ export default function ProductCard({ product }: ProductCardProps) {
 
   const formatImageUrl = (url: string) => {
     if (!url) return '';
-    let clean = url.replace(/^https?:\/\/(localhost|product-service|user-service)(:\d+)?/, '');
-    if (clean.startsWith('http://') || clean.startsWith('https://')) return clean;
+    if (url.includes('images.unsplash.com') || url.includes('placeholder.com') || url.includes('cloudfront.net')) {
+      return url;
+    }
+    let clean = url.replace(/^https?:\/\/[^\/]+/, '');
     clean = clean.replace(/^\/?app\/uploads\//, 'uploads/').replace(/\/app\/uploads\//, '/uploads/');
     const cleanPath = clean.startsWith('/') ? clean : `/${clean}`;
     return cleanPath.startsWith('/api') ? cleanPath : `/api${cleanPath}`;
