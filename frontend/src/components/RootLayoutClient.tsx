@@ -24,6 +24,35 @@ export default function RootLayoutClient({
 
   useEffect(() => {
     fetchExchangeRates();
+    
+    // Sync & purge Google Translate cookies on startup
+    if (typeof window !== 'undefined') {
+      const savedLang = localStorage.getItem('language') || 'en';
+      const hostname = window.location.hostname;
+      const domainParts = hostname.split('.');
+
+      const deleteCookie = (name: string, domain?: string) => {
+        const domainStr = domain ? `; domain=${domain}` : '';
+        document.cookie = `${name}=; expires=Thu, 01 Jan 1970 00:00:00 UTC; path=/${domainStr}`;
+        document.cookie = `${name}=; expires=Thu, 01 Jan 1970 00:00:00 UTC; path=/api${domainStr}`;
+      };
+
+      if (savedLang === 'en') {
+        if (document.cookie.includes('googtrans')) {
+          deleteCookie('googtrans');
+          deleteCookie('googtrans', hostname);
+          if (domainParts.length > 1) {
+            deleteCookie('googtrans', '.' + domainParts.slice(-2).join('.'));
+          }
+        }
+      } else {
+        const expected = `/en/${savedLang}`;
+        if (!document.cookie.includes(`googtrans=${expected}`)) {
+          document.cookie = `googtrans=${expected}; path=/;`;
+          document.cookie = `googtrans=${expected}; path=/; domain=${hostname};`;
+        }
+      }
+    }
   }, [fetchExchangeRates]);
 
   useEffect(() => {
