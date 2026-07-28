@@ -731,6 +731,48 @@ export default function SellerProductsPage() {
 
                 <div className="grid grid-cols-2 gap-4">
                   <div>
+                    <label className="block text-sm font-medium mb-1">Category *</label>
+                    <select
+                      value={category}
+                      onChange={(e) => setCategory(e.target.value)}
+                      className="input"
+                      required
+                    >
+                      {CATEGORIES.map((cat) => (
+                        <option key={cat} value={cat}>
+                          {cat}
+                        </option>
+                      ))}
+                    </select>
+                  </div>
+                  {category === 'Other' ? (
+                    <div>
+                      <label className="block text-sm font-medium mb-1">Custom Category Name *</label>
+                      <input
+                        type="text"
+                        value={customCategory}
+                        onChange={(e) => setCustomCategory(e.target.value)}
+                        className="input"
+                        placeholder="e.g. Handmade Crafts"
+                        required
+                      />
+                    </div>
+                  ) : (
+                    <div>
+                      <label className="block text-sm font-medium mb-1">Brand</label>
+                      <input
+                        type="text"
+                        value={brand}
+                        onChange={(e) => setBrand(e.target.value)}
+                        className="input"
+                        placeholder="e.g. Nike, Samsung"
+                      />
+                    </div>
+                  )}
+                </div>
+
+                <div className="grid grid-cols-2 gap-4">
+                  <div>
                     <label className="block text-sm font-medium mb-1">Stock Quantity *</label>
                     <input
                       type="number"
@@ -741,15 +783,18 @@ export default function SellerProductsPage() {
                       required
                     />
                   </div>
-                  <div>
-                    <label className="block text-sm font-medium mb-1">Brand</label>
-                    <input
-                      type="text"
-                      value={brand}
-                      onChange={(e) => setBrand(e.target.value)}
-                      className="input"
-                    />
-                  </div>
+                  {category !== 'Other' && (
+                    <div>
+                      <label className="block text-sm font-medium mb-1">Custom Tag / Note</label>
+                      <input
+                        type="text"
+                        value={customCategory}
+                        onChange={(e) => setCustomCategory(e.target.value)}
+                        className="input"
+                        placeholder="Optional"
+                      />
+                    </div>
+                  )}
                 </div>
 
                 {/* Image Upload Section */}
