@@ -72,12 +72,68 @@ export class GatewayController {
 
   @All('uploads*')
   async proxyUploads(@Req() req: Request, @Res() res: Response) {
-    return this.proxy('user', req, res);
+    return this.proxyWithFallback(['user', 'product'], req, res);
   }
 
   @All('app/uploads*')
   async proxyAppUploads(@Req() req: Request, @Res() res: Response) {
-    return this.proxy('user', req, res);
+    return this.proxyWithFallback(['user', 'product'], req, res);
+  }
+
+  private async proxyWithFallback(
+    services: Array<'user' | 'product' | 'cart' | 'order' | 'wishlist' | 'support'>,
+    req: Request,
+    res: Response,
+  ) {
+    const rawUrl = req.originalUrl || req.url;
+    const path = rawUrl.replace(/^(\/api)+/, '').replace(/^\//, '');
+
+    for (let i = 0; i < services.length; i++) {
+      const service = services[i];
+      try {
+        const result = await this.proxyService.proxyRequest(
+          service,
+          path,
+          req.method,
+          req.body,
+          req.headers,
+          req,
+        );
+
+        if (result.status === 404 && i < services.length - 1) {
+          console.log(`[GatewayController] Service ${service} returned 404 for ${path}, falling back to ${services[i + 1]}`);
+          continue;
+        }
+
+        if (result.status === 302 && result.headers.location) {
+          return res.redirect(result.status, result.headers.location);
+        }
+
+        res.status(result.status);
+        Object.keys(result.headers || {}).forEach((key) => {
+          if (key.toLowerCase() !== 'transfer-encoding' && key.toLowerCase() !== 'content-length') {
+            res.setHeader(key, result.headers[key]);
+          }
+        });
+
+        if (Buffer.isBuffer(result.data)) {
+          return res.end(result.data);
+        } else if (typeof result.data === 'object') {
+          return res.json(result.data);
+        } else {
+          return res.send(result.data);
+        }
+      } catch (err: any) {
+        if (i < services.length - 1) {
+          console.log(`[GatewayController] Service ${service} failed for ${path}, trying ${services[i + 1]}`);
+          continue;
+        }
+        throw new HttpException(
+          err.response?.data || 'Gateway Proxy Error',
+          err.response?.status || HttpStatus.BAD_GATEWAY,
+        );
+      }
+    }
   }
 
   private async proxy(

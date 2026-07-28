@@ -2,6 +2,7 @@ import { NestFactory } from '@nestjs/core';
 import { ValidationPipe } from '@nestjs/common';
 import { NestExpressApplication } from '@nestjs/platform-express';
 import { join } from 'path';
+import * as fs from 'fs';
 import { AppModule } from './app.module';
 import { Registry, Counter, Histogram, collectDefaultMetrics } from 'prom-client';
 
@@ -58,9 +59,17 @@ async function bootstrap() {
     },
   }));
 
-  // Serve uploaded files
-  app.useStaticAssets(join(__dirname, '..', 'uploads'), {
-    prefix: '/uploads/',
+  const uploadDir = join(process.cwd(), 'uploads');
+  if (!fs.existsSync(uploadDir)) {
+    fs.mkdirSync(uploadDir, { recursive: true });
+  }
+
+  // Serve uploaded files under multiple prefixes for robust URL resolution
+  app.useStaticAssets(uploadDir, {
+    prefix: '/uploads',
+  });
+  app.useStaticAssets(uploadDir, {
+    prefix: '/app/uploads',
   });
 
   const port = process.env.PORT || 3002;

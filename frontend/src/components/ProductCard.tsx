@@ -73,17 +73,26 @@ export default function ProductCard({ product }: ProductCardProps) {
     }
   };
 
+  const formatImageUrl = (url: string) => {
+    if (!url) return '';
+    let clean = url.replace(/^https?:\/\/(localhost|product-service|user-service)(:\d+)?/, '');
+    if (clean.startsWith('http://') || clean.startsWith('https://')) return clean;
+    clean = clean.replace(/^\/?app\/uploads\//, 'uploads/').replace(/\/app\/uploads\//, '/uploads/');
+    const cleanPath = clean.startsWith('/') ? clean : `/${clean}`;
+    return cleanPath.startsWith('/api') ? cleanPath : `/api${cleanPath}`;
+  };
+
   return (
     <Link href={`/products/${product.id}`} className="card hover:shadow-lg transition-shadow">
       {/* Product Image */}
       <div className="relative h-48 bg-gray-200 rounded-lg mb-4 overflow-hidden">
         {product.images && product.images.length > 0 ? (
           <img
-            src={product.images[0]}
+            src={formatImageUrl(product.images[0])}
             alt={product.name}
             className="w-full h-full object-cover"
             onError={(e) => {
-              e.currentTarget.src = 'https://via.placeholder.com/300x200?text=No+Image';
+              (e.target as HTMLElement).style.display = 'none';
             }}
           />
         ) : (

@@ -50,9 +50,11 @@ export default function InventoryOversight() {
 
   const getImageUrl = (url: string) => {
     if (!url) return '';
-    if (url.startsWith('http') || url.startsWith('data:')) return url;
-    const base = process.env.NEXT_PUBLIC_PRODUCT_SERVICE_URL || 'http://localhost:3002';
-    return `${base.replace(/\/$/, '')}/${url.replace(/^\//, '')}`;
+    let clean = url.replace(/^https?:\/\/(localhost|product-service|user-service)(:\d+)?/, '');
+    if (clean.startsWith('http://') || clean.startsWith('https://') || clean.startsWith('data:')) return clean;
+    clean = clean.replace(/^\/?app\/uploads\//, 'uploads/').replace(/\/app\/uploads\//, '/uploads/');
+    const cleanPath = clean.startsWith('/') ? clean : `/${clean}`;
+    return cleanPath.startsWith('/api') ? cleanPath : `/api${cleanPath}`;
   };
 
   // Extract unique categories
