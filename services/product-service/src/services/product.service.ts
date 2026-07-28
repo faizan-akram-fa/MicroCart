@@ -312,6 +312,7 @@ export class ProductService implements OnModuleInit {
 
   async getAdminInventory() {
     return this.productRepository.find({
+      where: { isActive: true },
       order: { createdAt: 'DESC' },
     });
   }

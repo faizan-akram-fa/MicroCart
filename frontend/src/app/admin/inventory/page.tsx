@@ -56,17 +56,24 @@ export default function InventoryOversight() {
 
   useEffect(() => {
     fetchInventory();
+
+    // Auto-refresh inventory every 5 seconds for real-time seller sync
+    const interval = setInterval(() => {
+      fetchInventory(true);
+    }, 5000);
+
+    return () => clearInterval(interval);
   }, []);
 
-  const fetchInventory = async () => {
-    setLoading(true);
+  const fetchInventory = async (isBackground = false) => {
+    if (!isBackground) setLoading(true);
     try {
       const res = await adminAPI.getInventory();
       setProducts(res.data || []);
     } catch (error) {
-      toast.error('Failed to load inventory data');
+      if (!isBackground) toast.error('Failed to load inventory data');
     } finally {
-      setLoading(false);
+      if (!isBackground) setLoading(false);
     }
   };
 
@@ -150,7 +157,7 @@ export default function InventoryOversight() {
           </div>
 
           <button 
-            onClick={fetchInventory}
+            onClick={() => fetchInventory(false)}
             disabled={loading}
             className={`flex items-center justify-center px-3.5 py-2.5 bg-white dark:bg-gray-800 border border-gray-200 dark:border-gray-700 rounded-xl transition-all text-xs font-medium text-gray-700 dark:text-gray-300 shadow-sm ${
               loading ? 'opacity-50 cursor-not-allowed' : 'hover:bg-gray-50 dark:hover:bg-gray-700 active:scale-95'
