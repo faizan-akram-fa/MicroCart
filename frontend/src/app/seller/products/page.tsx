@@ -210,16 +210,23 @@ export default function SellerProductsPage() {
     }
 
     fetchProducts();
+
+    // Auto-refresh seller products every 5 seconds for instant real-time sync
+    const interval = setInterval(() => {
+      fetchProducts(true);
+    }, 5000);
+
+    return () => clearInterval(interval);
   }, [user]);
 
-  const fetchProducts = async () => {
+  const fetchProducts = async (isBackground = false) => {
     try {
       const response = await productsAPI.getSellerProducts();
-      setProducts(response.data);
+      setProducts(response.data || []);
     } catch (error) {
-      toast.error('Failed to load products');
+      if (!isBackground) toast.error('Failed to load products');
     } finally {
-      setLoading(false);
+      if (!isBackground) setLoading(false);
     }
   };
 
@@ -372,7 +379,8 @@ export default function SellerProductsPage() {
 
       setShowModal(false);
       resetForm();
-      fetchProducts();
+      await fetchProducts(false);
+      router.refresh();
     } catch (error: any) {
       console.error(error);
       toast.error(error.response?.data?.message || 'Failed to save product', { id: loadingToast });
@@ -426,7 +434,9 @@ export default function SellerProductsPage() {
     try {
       await productsAPI.delete(id);
       toast.success('Product deleted successfully');
-      fetchProducts();
+      setProducts(prev => prev.filter(p => p.id !== id));
+      await fetchProducts(false);
+      router.refresh();
     } catch (error) {
       toast.error('Failed to delete product');
     }
