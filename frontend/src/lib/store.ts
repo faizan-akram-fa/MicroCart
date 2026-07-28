@@ -78,13 +78,36 @@ export const useAppStore = create<AppState>((set) => ({
     if (typeof window !== 'undefined') localStorage.setItem('currency', currency);
     set({ currency });
   },
-  setLanguage: (language) => {
+  setLanguage: (lang) => {
     if (typeof window !== 'undefined') {
-      localStorage.setItem('language', language);
-      document.cookie = `googtrans=/en/${language}; path=/;`;
+      localStorage.setItem('language', lang);
+
+      const hostname = window.location.hostname;
+      const domainParts = hostname.split('.');
+
+      // Helper to clear cookies for all paths and domains
+      const deleteCookie = (name: string, domain?: string) => {
+        const domainStr = domain ? `; domain=${domain}` : '';
+        document.cookie = `${name}=; expires=Thu, 01 Jan 1970 00:00:00 UTC; path=/${domainStr}`;
+        document.cookie = `${name}=; expires=Thu, 01 Jan 1970 00:00:00 UTC; path=/api${domainStr}`;
+      };
+
+      // Thoroughly wipe all variations of googtrans cookies
+      deleteCookie('googtrans');
+      deleteCookie('googtrans', hostname);
+      if (domainParts.length > 1) {
+        deleteCookie('googtrans', '.' + domainParts.slice(-2).join('.'));
+      }
+
+      // If user selected non-English, write fresh googtrans cookie
+      if (lang !== 'en') {
+        document.cookie = `googtrans=/en/${lang}; path=/;`;
+        document.cookie = `googtrans=/en/${lang}; path=/; domain=${hostname};`;
+      }
+
       window.location.reload();
     }
-    set({ language });
+    set({ language: lang });
   },
   fetchExchangeRates: async () => {
     if (typeof window === 'undefined') return;
