@@ -166,7 +166,7 @@ export default function ProductDetailPage() {
     };
 
     const formatImageUrl = (url: string) => {
-        if (!url) return 'https://images.unsplash.com/photo-1523275335684-37898b6baf30?w=500&auto=format&fit=crop';
+        if (!url) return '';
         let clean = url.replace(/^https?:\/\/(localhost|product-service|user-service)(:\d+)?/, '');
         if (clean.startsWith('http://') || clean.startsWith('https://')) return clean;
         clean = clean.replace(/^\/?app\/uploads\//, 'uploads/').replace(/\/app\/uploads\//, '/uploads/');
