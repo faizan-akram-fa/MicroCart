@@ -4,16 +4,39 @@
 
 import { Product } from '@/types';
 import Link from 'next/link';
-import { ShoppingCart, Heart, Star } from 'lucide-react';
+import { ShoppingCart, Heart, Star, Package } from 'lucide-react';
 import { cartAPI, wishlistAPI } from '@/lib/api';
 import { useAuthStore, useAppStore } from '@/lib/store';
 import { useCartStore } from '@/hooks/useCartStore';
 import { formatPrice } from '@/lib/currency';
 import toast from 'react-hot-toast';
 import { useRouter } from 'next/navigation';
+import { useState } from 'react';
 
 interface ProductCardProps {
   product: Product;
+}
+
+function ProductCardImage({ src, alt }: { src: string; alt: string }) {
+  const [hasError, setHasError] = useState(false);
+
+  if (hasError || !src) {
+    return (
+      <div className="w-full h-full flex flex-col items-center justify-center bg-gray-100 dark:bg-gray-800 text-gray-400 p-4 select-none">
+        <Package className="w-10 h-10 mb-1 opacity-50 text-gray-400 dark:text-gray-500" />
+        <span className="text-[10px] font-bold uppercase tracking-widest text-gray-400 dark:text-gray-500">No Image</span>
+      </div>
+    );
+  }
+
+  return (
+    <img
+      src={src}
+      alt={alt}
+      className="w-full h-full object-cover"
+      onError={() => setHasError(true)}
+    />
+  );
 }
 
 export default function ProductCard({ product }: ProductCardProps) {
@@ -86,22 +109,10 @@ export default function ProductCard({ product }: ProductCardProps) {
     <Link href={`/products/${product.id}`} className="card hover:shadow-lg transition-shadow">
       {/* Product Image */}
       <div className="relative h-48 bg-gray-200 rounded-lg mb-4 overflow-hidden">
-        {product.images && product.images.length > 0 ? (
-          <img
-            src={formatImageUrl(product.images[0])}
-            alt={product.name}
-            className="w-full h-full object-cover"
-            onError={(e) => {
-              const target = e.currentTarget;
-              target.onerror = null;
-              target.src = 'https://images.unsplash.com/photo-1523275335684-37898b6baf30?w=500&auto=format&fit=crop';
-            }}
-          />
-        ) : (
-          <div className="flex items-center justify-center h-full text-gray-400">
-            No Image
-          </div>
-        )}
+        <ProductCardImage
+          src={formatImageUrl(product.images?.[0] || '')}
+          alt={product.name}
+        />
 
         {/* Sale Badge */}
         {product.isOnSale && (

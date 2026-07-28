@@ -5,7 +5,7 @@ import { productsAPI } from '@/lib/api';
 import { useAuthStore } from '@/lib/store';
 import { useRouter } from 'next/navigation';
 import { Product } from '@/types';
-import { Plus, Edit, Trash2, X, Upload } from 'lucide-react';
+import { Plus, Edit, Trash2, X, Upload, Package } from 'lucide-react';
 import toast from 'react-hot-toast';
 
 const CATEGORIES = [
@@ -22,6 +22,28 @@ const CATEGORIES = [
   'Groceries',
   'Other'
 ];
+
+function SellerProductImage({ src, alt }: { src: string; alt: string }) {
+  const [hasError, setHasError] = useState(false);
+
+  if (hasError || !src) {
+    return (
+      <div className="w-full h-full flex flex-col items-center justify-center bg-gray-100 dark:bg-gray-800 text-gray-400 p-4 select-none">
+        <Package className="w-10 h-10 mb-1 opacity-50 text-gray-400 dark:text-gray-500" />
+        <span className="text-[10px] font-bold uppercase tracking-widest text-gray-400 dark:text-gray-500">No Image</span>
+      </div>
+    );
+  }
+
+  return (
+    <img
+      src={src}
+      alt={alt}
+      className="w-full h-full object-cover rounded"
+      onError={() => setHasError(true)}
+    />
+  );
+}
 
 export default function SellerProductsPage() {
   const { user } = useAuthStore();
@@ -58,8 +80,8 @@ export default function SellerProductsPage() {
 
   const downloadTemplate = () => {
     const csvContent = "name,description,price,stock,category,brand,images\n" +
-      "iPhone 15 Pro,Latest Apple flagship,350000,10,Smartphones,Apple,https://example.com/img1.jpg|https://example.com/img2.jpg\n" +
-      "Dell XPS 15,Powerful developer laptop,450000,5,Laptops,Dell,https://example.com/laptop.jpg";
+      "iPhone 15 Pro,Latest Apple flagship,350000,10,Smartphones,Apple,https://images.unsplash.com/photo-1695048133142-1a20484d2569?w=600\n" +
+      "Dell XPS 15,Powerful developer laptop,450000,5,Laptops,Dell,https://images.unsplash.com/photo-1593642632823-8f785ba67e45?w=600";
     
     const blob = new Blob([csvContent], { type: 'text/csv;charset=utf-8;' });
     const link = document.createElement("a");
@@ -444,18 +466,10 @@ export default function SellerProductsPage() {
           {products.map((product) => (
             <div key={product.id} className="card">
               <div className="relative h-48 bg-gray-200 rounded mb-4 overflow-hidden">
-                {product.images && product.images[0] ? (
-                  <img
-                    src={product.images[0]}
-                    alt={product.name}
-                    className="w-full h-full object-cover rounded"
-                    onError={(e) => {
-                      e.currentTarget.src = 'https://via.placeholder.com/300x200?text=No+Image';
-                    }}
-                  />
-                ) : (
-                  <div className="flex items-center justify-center h-full text-gray-500">No Image</div>
-                )}
+                <SellerProductImage
+                  src={product.images?.[0] || ''}
+                  alt={product.name}
+                />
                 {product.isOnSale && (
                   <span className="absolute top-2 left-2 bg-red-600 text-white text-xs font-bold px-2 py-1 rounded z-10 animate-pulse">
                     SALE
