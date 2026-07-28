@@ -128,15 +128,21 @@ export class ProductController {
     @UploadedFiles() files: Array<any>,
     @Req() req,
   ) {
-    if (files && files.length > 0) {
-      const serverUrl = process.env.API_URL || 'http://localhost:3002';
-      const newImageUrls = files.map(file => `${serverUrl}/uploads/${file.filename}`);
+    const frontendUrl = (process.env.FRONTEND_URL && !process.env.FRONTEND_URL.includes('localhost'))
+      ? process.env.FRONTEND_URL.replace(/\/+$/, '')
+      : 'https://microcart.me';
 
-      // Combine with existing images if any (assuming they might be sent as comma-separated string or array in body)
-      let existingImages = [];
-      if (body.existingImages) {
-        existingImages = Array.isArray(body.existingImages) ? body.existingImages : [body.existingImages];
-      }
+    let existingImages: string[] = [];
+    if (body.existingImages) {
+      existingImages = Array.isArray(body.existingImages) ? body.existingImages : [body.existingImages];
+    }
+
+    let newImageUrls: string[] = [];
+    if (files && files.length > 0) {
+      newImageUrls = files.map(file => `${frontendUrl}/api/uploads/${file.filename}`);
+    }
+
+    if ((files && files.length > 0) || body.existingImages !== undefined) {
       body.images = [...existingImages, ...newImageUrls];
     }
 
@@ -187,10 +193,12 @@ export class ProductController {
     }),
   }))
   async uploadBulkImages(@UploadedFiles() files: Array<any>) {
-    const serverUrl = process.env.API_URL || 'http://localhost:3002';
+    const frontendUrl = (process.env.FRONTEND_URL && !process.env.FRONTEND_URL.includes('localhost'))
+      ? process.env.FRONTEND_URL.replace(/\/+$/, '')
+      : 'https://microcart.me';
     return files.map(file => ({
       originalName: file.originalname,
-      url: `${serverUrl}/uploads/${file.filename}`
+      url: `${frontendUrl}/api/uploads/${file.filename}`
     }));
   }
 }
