@@ -143,6 +143,15 @@ export default function ProductDetailPage() {
         toast.success('Link copied to clipboard!');
     };
 
+    const formatImageUrl = (url: string) => {
+        if (!url) return 'https://images.unsplash.com/photo-1523275335684-37898b6baf30?w=500&auto=format&fit=crop';
+        let clean = url.replace(/^https?:\/\/(localhost|product-service|user-service)(:\d+)?/, '');
+        if (clean.startsWith('http://') || clean.startsWith('https://')) return clean;
+        clean = clean.replace(/^\/?app\/uploads\//, 'uploads/').replace(/\/app\/uploads\//, '/uploads/');
+        const cleanPath = clean.startsWith('/') ? clean : `/${clean}`;
+        return cleanPath.startsWith('/api') ? cleanPath : `/api${cleanPath}`;
+    };
+
     if (loading) {
         return (
             <div className="min-h-screen flex items-center justify-center">
@@ -166,11 +175,13 @@ export default function ProductDetailPage() {
                 <div className="space-y-4">
                     <div className="aspect-square bg-gray-100 rounded-2xl overflow-hidden shadow-sm relative">
                         <img
-                            src={selectedImage || 'https://via.placeholder.com/600x600?text=No+Image'}
+                            src={formatImageUrl(selectedImage)}
                             alt={product.name}
                             className="w-full h-full object-contain"
                             onError={(e) => {
-                                e.currentTarget.src = 'https://via.placeholder.com/600x400?text=No+Image';
+                                const target = e.currentTarget;
+                                target.onerror = null;
+                                target.src = 'https://images.unsplash.com/photo-1523275335684-37898b6baf30?w=500&auto=format&fit=crop';
                             }}
                         />
                         {product.isOnSale && (
@@ -189,7 +200,7 @@ export default function ProductDetailPage() {
                                     className={`relative w-20 h-20 flex-shrink-0 rounded-lg overflow-hidden border-2 transition-all ${selectedImage === img ? 'border-primary-600 ring-2 ring-primary-100 dark:ring-primary-900' : 'border-transparent hover:border-gray-300 dark:hover:border-gray-600'
                                         }`}
                                 >
-                                    <img src={img} alt={`View ${idx + 1}`} className="w-full h-full object-cover" />
+                                    <img src={formatImageUrl(img)} alt={`View ${idx + 1}`} className="w-full h-full object-cover" />
                                 </button>
                             ))}
                         </div>
