@@ -135,6 +135,14 @@ spec:
             limits:
               cpu: 500m
               memory: 512Mi
+          volumeMounts:
+            - name: persistent-uploads
+              mountPath: /app/uploads
+      volumes:
+        - name: persistent-uploads
+          hostPath:
+            path: /var/microcart/uploads
+            type: DirectoryOrCreate
 ---
 apiVersion: v1
 kind: Service
@@ -209,6 +217,14 @@ spec:
             limits:
               cpu: 500m
               memory: 512Mi
+          volumeMounts:
+            - name: persistent-uploads
+              mountPath: /app/uploads
+      volumes:
+        - name: persistent-uploads
+          hostPath:
+            path: /var/microcart/uploads
+            type: DirectoryOrCreate
 ---
 apiVersion: v1
 kind: Service
