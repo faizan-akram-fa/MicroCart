@@ -8,9 +8,31 @@ import { productsAPI, cartAPI, wishlistAPI } from '@/lib/api';
 import { useAuthStore } from '@/lib/store';
 import { Product } from '@/types';
 import toast from 'react-hot-toast';
-import { Star, ShoppingCart, Heart, ArrowLeft, Minus, Plus, Share2, MessageSquare } from 'lucide-react';
+import { Star, ShoppingCart, Heart, ArrowLeft, Minus, Plus, Share2, MessageSquare, Package } from 'lucide-react';
 import { useCartStore } from '@/hooks/useCartStore';
 import ReviewSection from '@/components/ReviewSection';
+
+function ProductDetailPageImage({ src, alt }: { src: string; alt: string }) {
+    const [hasError, setHasError] = useState(false);
+
+    if (hasError || !src) {
+        return (
+            <div className="w-full h-full flex flex-col items-center justify-center bg-gray-100 dark:bg-gray-800 text-gray-400 p-8 select-none">
+                <Package className="w-16 h-16 mb-2 opacity-50 text-gray-400 dark:text-gray-500" />
+                <span className="text-xs font-bold uppercase tracking-widest text-gray-400 dark:text-gray-500">No Image</span>
+            </div>
+        );
+    }
+
+    return (
+        <img
+            src={src}
+            alt={alt}
+            className="w-full h-full object-contain"
+            onError={() => setHasError(true)}
+        />
+    );
+}
 
 export default function ProductDetailPage() {
     const params = useParams();
@@ -174,15 +196,9 @@ export default function ProductDetailPage() {
                 {/* Gallery Section */}
                 <div className="space-y-4">
                     <div className="aspect-square bg-gray-100 rounded-2xl overflow-hidden shadow-sm relative">
-                        <img
+                        <ProductDetailPageImage
                             src={formatImageUrl(selectedImage)}
                             alt={product.name}
-                            className="w-full h-full object-contain"
-                            onError={(e) => {
-                                const target = e.currentTarget;
-                                target.onerror = null;
-                                target.src = 'https://images.unsplash.com/photo-1523275335684-37898b6baf30?w=500&auto=format&fit=crop';
-                            }}
                         />
                         {product.isOnSale && (
                             <span className="absolute top-4 left-4 bg-red-600 text-white text-sm font-bold px-3 py-1 rounded shadow-lg animate-pulse z-10">
